@@ -105,6 +105,187 @@ var SETTINGS = [];
 // We'll get this from localStorage on document ready
 SETTINGS.coordinate_format = 'dms';
 
+var currentTrailViewMarker = null;
+var currTrailViewGeo = null;
+var isMouseOnTrailViewLayer = false;
+
+/**
+ * Creates TrailView map layer for dots
+ * @param {object} data - TrailView data
+ */
+ function createTrailViewMapLayer(data) {
+    let layerData = {
+        'type': 'geojson',
+        'data': {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+    }
+    let features = [];
+    for (let i = 0; i < data.length; i++) {
+        let f = {
+            'type': 'Feature',
+            'properties': {
+                'imageID': data[i]['id']
+            },
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [data[i]['longitude'], data[i]['latitude']]
+            }
+        }
+        features.push(f);
+    }
+    layerData['data']['features'] = features;
+    MAP.addSource('dots', layerData);
+
+    MAP.addLayer({
+        'id': 'dots',
+        'type': 'circle',
+        'source': 'dots',
+        'paint': {
+            'circle-radius': 10,
+            'circle-color': '#00a108',
+            'circle-pitch-alignment': 'viewport',
+            'circle-pitch-scale': 'map',
+        }
+    });
+    MAP.setPaintProperty('dots', 'circle-radius', [
+        'interpolate',
+
+        ['exponential', 0.5],
+        ['zoom'],
+        13,
+        3,
+
+        16,
+        5,
+
+        17,
+        7,
+
+        20,
+        10
+    ]);
+    MAP.setPaintProperty('dots', 'circle-opacity', [
+        'interpolate',
+
+        ['exponential', 0.5],
+        ['zoom'],
+        13,
+        0.05,
+
+        15,
+        0.1,
+
+        17,
+        0.25,
+
+        20,
+        1
+    ]);   
+ 
+    if (!currentTrailViewMarker) {
+        // Create currentTrailViewMarker icon
+        const currentTrailViewMarker_wrap = document.createElement('div');
+        currentTrailViewMarker_wrap.classList.add('marker_current_wrapper');
+        const currentTrailViewMarker_div = document.createElement('div');
+        currentTrailViewMarker_div.classList.add('marker_current');
+        const currentTrailViewMarker_view_div = document.createElement('div');
+        currentTrailViewMarker_view_div.classList.add('marker_viewer');
+        currentTrailViewMarker_wrap.appendChild(currentTrailViewMarker_div);
+        currentTrailViewMarker_wrap.appendChild(currentTrailViewMarker_view_div);
+        currentTrailViewMarker = new mapboxgl.Marker(currentTrailViewMarker_wrap)
+            .setLngLat([-81.6826650, 41.4097766])
+            .addTo(MAP)
+            .setRotationAlignment('map')
+            .setPitchAlignment('map');
+    }
+    
+
+    if (currTrailViewGeo != null) {
+        currentTrailViewMarker.setLngLat([currTrailViewGeo.longitude, currTrailViewGeo.latitude]);
+    }
+
+    MAP.jumpTo({
+        center: currentTrailViewMarker.getLngLat(),
+        zoom: 16,
+        bearing: 0,
+    });
+
+    // Handle when dots are clicked
+    MAP.on('click', 'dots', (e) => {
+        TRAILVIEWER.goToImageID(e.features[0].properties.imageID);
+    });
+
+    // Update visual cursor
+    MAP.on("mouseenter", 'dots', () => {
+        isMouseOnTrailViewLayer = true;
+        MAP.getCanvas().style.cursor = "pointer";
+    });
+
+    MAP.on("mouseleave", 'dots', () => {
+        isMouseOnTrailViewLayer = false;
+        MAP.getCanvas().style.cursor = "grab";
+    });
+
+    MAP.on('mousedown', () => {
+        if (!isMouseOnTrailViewLayer) {
+            MAP.getCanvas().style.cursor = "grabbing";
+        }
+    });
+
+    MAP.on('mouseup', () => {
+        if (isMouseOnTrailViewLayer) {
+            MAP.getCanvas().style.cursor = 'pointer';
+        } else {
+            MAP.getCanvas().style.cursor = 'grab';
+        }
+    });
+}
+
+/**
+ * Called when data has been fetched and 
+ * then initializes viewer and map
+ * @param {Object} data 
+ */
+ function initTrailView(data) {
+
+    TRAILVIEWER = new TrailViewer({
+        'useURLHashing': false, 
+        'onGeoChangeFunc': onGeoChange,
+        // 'onSceneChangeFunc': onSceneChange,
+        'onInitDoneFunc': onInitDone,
+        'onArrowsAddedFunc': populateArrows,
+        'navArrowMinAngle': -25,
+        'navArrowMaxAngle': -20,
+    }, 
+    '56aefc085da0466a8bb4139c4515cd0c', data);
+
+
+
+    MAP.once('load', () => {
+        createTrailViewMapLayer(data);
+    });
+}
+
+var trailViewData = null;
+
+/**
+ * Fetches base data for points
+ */
+ function fetchTrailViewData() {
+    $.getJSON("https://trailview.cmparks.net/api/images.php", {
+        'type': 'standard'
+        },
+        function (data, textStatus, jqXHR) {
+            trailViewData = data['imagesStandard'];
+            initTrailView(data['imagesStandard']);
+        }
+    );
+}
+
+
+
 /**
  * Initialize the map
  *
@@ -137,6 +318,7 @@ function initMap(mapOptions) {
     MAP = new mapboxgl.Map({
          container: 'map_canvas',
          style: basemap_style,
+         clickTolerance: 10,
          center: START_CENTER,
          zoom: START_ZOOM,
          preserveDrawingBuffer: true // for printing in certain browsers
@@ -184,11 +366,22 @@ function initMap(mapOptions) {
 }
 
 /**
+ * Called by setInterval() and updates currentTrailViewMarker bearing
+ */
+ function updateMarkerRotation() {
+    if (TRAILVIEWER && TRAILVIEWER._panViewer && currentTrailViewMarker) {
+        let angle = TRAILVIEWER.getBearing();
+        currentTrailViewMarker.setRotation((angle + 225) % 360);
+    }
+}
+
+/**
  * Called when viewer initialization is done
  * @param {TrailViewer} viewer
  */
 function onInitDone(viewer) {
     viewer._panViewer.resize();
+    setInterval(updateMarkerRotation, 13);
     setInterval(updateNavArrows, 13);
 }
 
@@ -260,22 +453,18 @@ function onInitDone(viewer) {
 }
 
 /**
- * Create TrailViewer
- * @param {Object} data 
+ * Called when geo is changed from viewer
+ * @param {Object} geo - format {'latitude': 0, 'longitude': 0}
  */
-function initViewer() {
-
-    TRAILVIEWER = new TrailViewer({
-            'useURLHashing': false, 
-            // 'onGeoChangeFunc': onGeoChange,
-            // 'onSceneChangeFunc': onSceneChange,
-            'onInitDoneFunc': onInitDone,
-            'onArrowsAddedFunc': populateArrows,
-            'navArrowMinAngle': -25,
-            'navArrowMaxAngle': -20,
-        }, 
-        '56aefc085da0466a8bb4139c4515cd0c', null);
-
+ function onGeoChange(geo) {
+    currTrailViewGeo = geo;
+    if (currentTrailViewMarker != null) {
+        currentTrailViewMarker.setLngLat([geo['longitude'], geo['latitude']]);
+        MAP.easeTo({
+            center: currentTrailViewMarker.getLngLat(),
+            duration: 500,
+        });
+    }
 }
 
 /**
@@ -325,6 +514,23 @@ function showInfoPopup(message, type) {
 function changeBasemap(layer_key) {
     active_layer = STYLE_LAYERS[layer_key];
     MAP.setStyle(active_layer);
+    if (active_layer == STYLE_LAYER_CM_SAT) {
+        MAP.once('style.load', () => {
+            MAP.addSource('mapbox-dem', {
+                'type': 'raster-dem',
+                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                'tileSize': 512,
+                'maxzoom': 14
+            });
+            MAP.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
+            createTrailViewMapLayer(trailViewData);
+        });
+    } else {
+        MAP.once('style.load', () => {
+            MAP.setTerrain(null);
+            createTrailViewMapLayer(trailViewData);
+        });
+    }
 }
 
 /**
@@ -976,7 +1182,7 @@ function switchToMap() {
 $(document).ready(function () {
     loadMapAndStartingState();
     populateSidebarPanes();
-    initViewer();
+    fetchTrailViewData();
 });
 
 /**

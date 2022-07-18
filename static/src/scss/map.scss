@@ -8,6 +8,14 @@
  */
 
 //
+// Geolocate
+//
+.mapboxgl-user-location-accuracy-circle {
+    pointer-events: none;
+}
+
+
+//
 // Controls
 //
 .mapboxgl-ctrl-icon.mapboxgl-ctrl-geolocate.watching  {
