@@ -46,6 +46,16 @@
     <!-- App CSS -->
     <link type="text/css" rel="stylesheet" href="/static/dist/css/mobile.css?v=1648762706" />
 
+    <!-- TrailView -->
+    <script type="text/javascript" src="https://unpkg.com/cheap-ruler@3.0.1/cheap-ruler.min.js"></script>
+    <link rel="stylesheet" href="https://trailview.cmparks.net/dist/pannellum-metroparks/build/pannellum.css"/>
+    <script type="text/javascript" src="https://trailview.cmparks.net/dist/pannellum-metroparks/build/pannellum.js"></script>
+    <script type="text/javascript" src="https://trailview.cmparks.net/js/trailviewer.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://trailview.cmparks.net/css/viewer.css" />
+    <link type="text/css" rel="stylesheet" href="https://trailview.cmparks.net/css/viewer-desktop.css" />
+    <link type="text/css" rel="stylesheet" href="https://trailview.cmparks.net/css/main.css" />
+    <link type="text/css" rel="stylesheet" href="https://trailview.cmparks.net/css/main-desktop.css" />
+
     <!-- Typekit -->
     <script>
         (function(d) {
@@ -616,6 +626,14 @@
 
 <!-- Map -->
 <div id="map_canvas" class="sidebar-map"></div>
+
+<div id="viewer_container" class="small_container" style="left: 72px;">
+    <div id="panorama" style="width: 100%; height: 100%;"></div>
+    <div id="nav_container" class="nav_container-small">
+        <a><img class="new_nav" src="/assets/images/ui/arrow_new_small_white.png" draggable="false"></a>
+    </div>
+</div>
+
 
 <!-- Audio -->
 <audio autoboffer id="alert_beep">

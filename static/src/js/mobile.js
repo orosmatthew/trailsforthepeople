@@ -74,11 +74,12 @@ function switchToMap() {
 }
 
 /**
- * Load the map and process query string parameters on doc ready.
+ * Load the map, process query string parameters, and start TrailViewer on doc ready.
  */
 $(document).ready(function () {
     loadMapAndStartingState();
     populateSidebarPanes();
+    initViewer();
 });
 
 /**

@@ -100,6 +100,101 @@ function initMap(mapOptions) {
 }
 
 /**
+ * Called when viewer initialization is done
+ * @param {TrailViewer} viewer
+ */
+function onInitDone(viewer) {
+    viewer._panViewer.resize();
+    setInterval(updateNavArrows, 13);
+}
+
+/**
+ * Updates navigation arrows transform
+ * Called by setInterval()
+ */
+ function updateNavArrows() {
+    if (TRAILVIEWER) {
+        // Arrow rotation
+        $('.new_nav').each(function (index, element) {
+            let yaw = customMod(((360 - angle180to360(TRAILVIEWER._panViewer.getYaw())) + $(element).data('yaw')), 360);
+            // if (mapFullscreen) {
+            $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-50px)');
+            // } else {
+            //     $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-100px)');
+            // }
+        });
+        // Container rotation
+        let rot = (TRAILVIEWER._panViewer.getPitch() + 90) / 2.0;
+        if (rot > 80) {
+            rot = 80
+        } else if (rot < 0) {
+            rot = 0;
+        }
+        $('#nav_container').css('transform', 'perspective(300px) rotateX(' + rot + 'deg)');
+    }
+}
+
+/**
+ * Called when navigation arrow is clicked
+ * @param {String} id - Image ID to navigate to
+ */
+ function onNavArrowClicked(id) {
+    TRAILVIEWER.goToImageID(id);
+}
+
+/**
+ * 
+ * @param {Object} hotspots - JSON object from pannellum config
+ */
+ function populateArrows(hotspots) {
+    currentHotspots = hotspots;
+    $('.new_nav').remove();
+    if (!hotspots) {
+        return;
+    }
+    for (let i = 0; i < hotspots.length; i++) {
+        let link = document.createElement('img');
+        $(link).addClass('new_nav');
+        // if (mapFullscreen) {
+        $(link).addClass('new_nav-small');
+        // }
+        $(link).attr('src', 'https://trailview.cmparks.net/assets/images/ui/arrow_new_small_white.png');
+        $(link).data('yaw', hotspots[i].yaw);
+        $(link).data('id', hotspots[i]['clickHandlerArgs']['id']);
+        $(link).hide(0);
+        $(link).on('click', function (e) { 
+            e.preventDefault();
+            onNavArrowClicked($(this).data('id'));
+            $('.new_nav').fadeOut(10);
+        });
+        $(link).attr('draggable', false);
+        //$(link).css('transform', 'rotateZ(' + hotspots[i].yaw + 'deg) translateY(-100px)');
+        $('#nav_container').append($(link));
+    }
+    updateNavArrows();
+    $('.new_nav').fadeIn(200);
+}
+
+/**
+ * Create TrailViewer
+ * @param {Object} data 
+ */
+function initViewer() {
+
+    TRAILVIEWER = new TrailViewer({
+            'useURLHashing': false, 
+            // 'onGeoChangeFunc': onGeoChange,
+            // 'onSceneChangeFunc': onSceneChange,
+            'onInitDoneFunc': onInitDone,
+            'onArrowsAddedFunc': populateArrows,
+            'navArrowMinAngle': -25,
+            'navArrowMaxAngle': -20,
+        }, 
+        '56aefc085da0466a8bb4139c4515cd0c', null);
+
+}
+
+/**
  * Place marker
  */
 function placeMarker(marker, lat, lng) {
