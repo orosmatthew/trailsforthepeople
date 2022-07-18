@@ -63,6 +63,9 @@ var isMouseOnTrailViewLayer = false;
             'circle-color': '#00a108',
             'circle-pitch-alignment': 'viewport',
             'circle-pitch-scale': 'map',
+        },
+        'layout': {
+            'circle-sort-key': 100,
         }
     });
     MAP.setPaintProperty('dots', 'circle-radius', [
@@ -115,22 +118,36 @@ var isMouseOnTrailViewLayer = false;
             .addTo(MAP)
             .setRotationAlignment('map')
             .setPitchAlignment('map');
+        if (currTrailViewGeo != null) {
+            currentTrailViewMarker.setLngLat([currTrailViewGeo.longitude, currTrailViewGeo.latitude]);
+        }
+        MAP.jumpTo({
+            center: currentTrailViewMarker.getLngLat(),
+            zoom: 16,
+            bearing: 0,
+        });
     }
-    
-
-    if (currTrailViewGeo != null) {
-        currentTrailViewMarker.setLngLat([currTrailViewGeo.longitude, currTrailViewGeo.latitude]);
-    }
-
-    MAP.jumpTo({
-        center: currentTrailViewMarker.getLngLat(),
-        zoom: 16,
-        bearing: 0,
-    });
 
     // Handle when dots are clicked
-    MAP.on('click', 'dots', (e) => {
-        TRAILVIEWER.goToImageID(e.features[0].properties.imageID);
+    MAP.on('click', (e) => {
+        const ruler = new CheapRuler(41, 'meters');
+        let lng = e.lngLat.lng;
+        let lat = e.lngLat.lat;
+        let minDist = 1000;
+        let minId = null;
+        for (let i = 0; i < trailViewData.length; i++) {
+            let dist = ruler.distance([lng, lat], [trailViewData[i].longitude, trailViewData[i].latitude]);
+            if (dist < 10) {
+                if (dist < minDist) {
+                    minId = trailViewData[i].id;
+                    minDist = dist;
+                }
+            }
+        }
+        if (minId != null) {
+            TRAILVIEWER.goToImageID(minId);
+        }
+
     });
 
     // Update visual cursor
@@ -177,10 +194,40 @@ var isMouseOnTrailViewLayer = false;
     }, 
     '56aefc085da0466a8bb4139c4515cd0c', data);
 
-
-
     MAP.once('load', () => {
         createTrailViewMapLayer(data);
+    });
+
+    $('#3d_checkbox').on('change', () => {
+        if ($('#3d_checkbox').is(':checked')) {
+            changeBasemap('photo');
+            setTimeout(() => {
+                MAP.easeTo({
+                    center: currentTrailViewMarker.getLngLat(),
+                    pitch: 60,
+                    bearing: MAP.getBearing() + 179,
+                    easing: (x) => (1 - Math.cos((x * Math.PI) / 2)),
+                    duration: 3000,
+                }).once('moveend', () => {
+                    MAP.easeTo({
+                        bearing: MAP.getBearing() + 179,
+                        duration: 7000,
+                        easing: (x) => Math.sin((x * Math.PI) / 2),
+                    })
+                });
+            }, 500);
+        } else {
+            changeBasemap('map');
+            MAP.stop();
+            setTimeout(() => {
+                MAP.easeTo({
+                    center: currentTrailViewMarker.getLngLat(),
+                    pitch: 0,
+                    duration: 500,
+                    bearing: 0,
+                });
+            }, 500);
+        }
     });
 }
 
@@ -237,6 +284,7 @@ function initMap(mapOptions) {
          clickTolerance: 10,
          center: START_CENTER,
          zoom: START_ZOOM,
+         maxPitch: 60,
          preserveDrawingBuffer: true // for printing in certain browsers
      });
 
@@ -435,7 +483,7 @@ function changeBasemap(layer_key) {
             MAP.addSource('mapbox-dem', {
                 'type': 'raster-dem',
                 'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
-                'tileSize': 512,
+                'tileSize': 256,
                 'maxzoom': 14
             });
             MAP.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
