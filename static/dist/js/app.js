@@ -69,7 +69,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY2xldmVsYW5kLW1ldHJvcGFya3MiLCJhIjoiWHRKaDhuR
 
 // Mapbox styles (baselayers)
 var STYLE_LAYER_CM_MAP = 'mapbox://styles/cleveland-metroparks/cisvvmgwe00112xlk4jnmrehn'; // Vector
-var STYLE_LAYER_CM_SAT = 'mapbox://styles/cleveland-metroparks/cjcutetjg07892ro6wunp2da9'; // Satellite
+var STYLE_LAYER_CM_SAT = 'mapbox://styles/cleveland-metroparks/cjcutetjg07892ro6wunp2da9?optimize=true'; // Satellite
 
 var STYLE_LAYERS = {
     'map' : STYLE_LAYER_CM_MAP,
@@ -285,6 +285,8 @@ var isMouseOnTrailViewLayer = false;
     $('#3d_checkbox').on('change', () => {
         if ($('#3d_checkbox').is(':checked')) {
             changeBasemap('photo');
+            MAP.setMaxPitch(60);
+            MAP.setMinPitch(0);
             setTimeout(() => {
                 MAP.easeTo({
                     center: currentTrailViewMarker.getLngLat(),
@@ -309,6 +311,9 @@ var isMouseOnTrailViewLayer = false;
                     pitch: 0,
                     duration: 500,
                     bearing: 0,
+                }).once('moveend', () => {
+                    MAP.setMaxPitch(0);
+                    MAP.setMinPitch(0);
                 });
             }, 500);
         }
@@ -369,7 +374,7 @@ function initMap(mapOptions) {
          center: START_CENTER,
          zoom: START_ZOOM,
          maxPitch: 60,
-         preserveDrawingBuffer: true // for printing in certain browsers
+         preserveDrawingBuffer: true, // for printing in certain browsers
      });
 
     // Nav (zoom/tilt) Control
@@ -566,7 +571,7 @@ function changeBasemap(layer_key) {
         MAP.once('style.load', () => {
             MAP.addSource('mapbox-dem', {
                 'type': 'raster-dem',
-                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1?optimize=true',
                 'tileSize': 256,
                 'maxzoom': 14
             });

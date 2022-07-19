@@ -201,6 +201,8 @@ var isMouseOnTrailViewLayer = false;
     $('#3d_checkbox').on('change', () => {
         if ($('#3d_checkbox').is(':checked')) {
             changeBasemap('photo');
+            MAP.setMaxPitch(60);
+            MAP.setMinPitch(0);
             setTimeout(() => {
                 MAP.easeTo({
                     center: currentTrailViewMarker.getLngLat(),
@@ -225,6 +227,9 @@ var isMouseOnTrailViewLayer = false;
                     pitch: 0,
                     duration: 500,
                     bearing: 0,
+                }).once('moveend', () => {
+                    MAP.setMaxPitch(0);
+                    MAP.setMinPitch(0);
                 });
             }, 500);
         }
@@ -482,7 +487,7 @@ function changeBasemap(layer_key) {
         MAP.once('style.load', () => {
             MAP.addSource('mapbox-dem', {
                 'type': 'raster-dem',
-                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1?optimize=true',
                 'tileSize': 256,
                 'maxzoom': 14
             });
