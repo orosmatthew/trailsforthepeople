@@ -217,7 +217,7 @@ function checkTrailViewState() {
         } else {
             MAP.addLayer('dots');
         }
-        createTrailViewer();
+        createTrailViewer(trailViewData);
     } else {
         if (MAP.getLayer('dots')) {
             MAP.removeLayer('dots');
@@ -316,12 +316,12 @@ function destroyTrailViewer() {
 
     // Handle when dots are clicked
     MAP.on('click', (e) => {
-        console.log("here!");
-        let minId = TRAILVIEWER.getNearestImageId(e.lngLat.lat, e.lngLat.lng, 10);
-        if (minId != null) {
-            TRAILVIEWER.goToImageID(minId);
+        if (TRAILVIEWER) {
+            let minId = TRAILVIEWER.getNearestImageId(e.lngLat.lat, e.lngLat.lng, 10);
+            if (minId != null) {
+                TRAILVIEWER.goToImageID(minId);
+            }
         }
-
     });
 
     // Update visual cursor
@@ -511,7 +511,6 @@ function onInitDone(viewer) {
  * @param {Object} hotspots - JSON object from pannellum config
  */
  function populateArrows(hotspots) {
-    console.log(hotspots);
     currentHotspots = hotspots;
     $('.new_nav').remove();
     if (!hotspots) {
