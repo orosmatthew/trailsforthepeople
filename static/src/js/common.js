@@ -123,29 +123,11 @@ var isMouseOnTrailViewLayer = false;
         if (currTrailViewGeo != null) {
             currentTrailViewMarker.setLngLat([currTrailViewGeo.longitude, currTrailViewGeo.latitude]);
         }
-        MAP.jumpTo({
-            center: currentTrailViewMarker.getLngLat(),
-            zoom: 16,
-            bearing: 0,
-        });
     }
 
     // Handle when dots are clicked
     MAP.on('click', (e) => {
-        const ruler = new CheapRuler(41, 'meters');
-        let lng = e.lngLat.lng;
-        let lat = e.lngLat.lat;
-        let minDist = 1000;
-        let minId = null;
-        for (let i = 0; i < trailViewData.length; i++) {
-            let dist = ruler.distance([lng, lat], [trailViewData[i].longitude, trailViewData[i].latitude]);
-            if (dist < 10) {
-                if (dist < minDist) {
-                    minId = trailViewData[i].id;
-                    minDist = dist;
-                }
-            }
-        }
+        let minId = TRAILVIEWER.getNearestImageId(e.lngLat.lat, e.lngLat.lng, 10);
         if (minId != null) {
             TRAILVIEWER.goToImageID(minId);
         }
@@ -185,13 +167,45 @@ function checkTrailViewState() {
         } else {
             MAP.addLayer('dots');
         }
+        createTrailViewer();
     } else {
         if (MAP.getLayer('dots')) {
             MAP.removeLayer('dots');
         }
+        if (currentTrailViewMarker) {
+            currentTrailViewMarker.remove();
+            currentTrailViewMarker = null;
+        }
+        clearInterval(updateMarkerRotationInterval);
+        clearInterval(updateNavArrowsInterval);
+        destroyTrailViewer();
     }
 }
 
+
+function createTrailViewer(data) {
+    if (!TRAILVIEWER) {
+        TRAILVIEWER = new TrailViewer({
+            'useURLHashing': false, 
+            'onGeoChangeFunc': onGeoChange,
+            // 'onSceneChangeFunc': onSceneChange,
+            'onInitDoneFunc': onInitDone,
+            'onArrowsAddedFunc': populateArrows,
+            'navArrowMinAngle': -25,
+            'navArrowMaxAngle': -20,
+        }, 
+        null, data, MAP.getCenter().lat, MAP.getCenter().lng);
+    }
+    $('#viewer_container').stop().fadeIn(500);
+}
+
+function destroyTrailViewer() {
+    if (TRAILVIEWER) {
+        TRAILVIEWER.destroy();
+        TRAILVIEWER = null;
+    }
+    $('#viewer_container').stop().fadeOut(500);
+}
 
 /**
  * Called when data has been fetched and 
@@ -199,17 +213,6 @@ function checkTrailViewState() {
  * @param {Object} data 
  */
  function initTrailView(data) {
-
-    TRAILVIEWER = new TrailViewer({
-        'useURLHashing': false, 
-        'onGeoChangeFunc': onGeoChange,
-        // 'onSceneChangeFunc': onSceneChange,
-        'onInitDoneFunc': onInitDone,
-        'onArrowsAddedFunc': populateArrows,
-        'navArrowMinAngle': -25,
-        'navArrowMaxAngle': -20,
-    }, 
-    '56aefc085da0466a8bb4139c4515cd0c', data);
 
     $('#trailview_checkbox').on('change', () => {
         checkTrailViewState();
@@ -220,9 +223,13 @@ function checkTrailViewState() {
             changeBasemap('photo');
             MAP.setMaxPitch(60);
             MAP.setMinPitch(0);
+            let orbit_pos = MAP.getCenter();
+            if (currentTrailViewMarker) {
+                orbit_pos = currentTrailViewMarker.getLngLat();
+            }
             setTimeout(() => {
                 MAP.easeTo({
-                    center: currentTrailViewMarker.getLngLat(),
+                    center: orbit_pos,
                     pitch: 60,
                     bearing: MAP.getBearing() + 179,
                     easing: (x) => (1 - Math.cos((x * Math.PI) / 2)),
@@ -238,9 +245,13 @@ function checkTrailViewState() {
         } else {
             changeBasemap('map');
             MAP.stop();
+            let orbit_pos = MAP.getCenter();
+            if (currentTrailViewMarker) {
+                orbit_pos = currentTrailViewMarker.getLngLat();
+            }
             setTimeout(() => {
                 MAP.easeTo({
-                    center: currentTrailViewMarker.getLngLat(),
+                    center: orbit_pos,
                     pitch: 0,
                     duration: 500,
                     bearing: 0,
@@ -362,14 +373,17 @@ function initMap(mapOptions) {
     }
 }
 
+var updateMarkerRotationInterval = null;
+var updateNavArrowsInterval = null;
+
 /**
  * Called when viewer initialization is done
  * @param {TrailViewer} viewer
  */
 function onInitDone(viewer) {
     viewer._panViewer.resize();
-    setInterval(updateMarkerRotation, 13);
-    setInterval(updateNavArrows, 13);
+    updateMarkerRotationInterval = setInterval(updateMarkerRotation, 16);
+    updateNavArrowsInterval = setInterval(updateNavArrows, 16);
 }
 
 /**
