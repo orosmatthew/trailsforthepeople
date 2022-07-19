@@ -114,30 +114,32 @@ var isMouseOnTrailViewLayer = false;
  * @param {object} data - TrailView data
  */
  function createTrailViewMapLayer(data) {
-    let layerData = {
-        'type': 'geojson',
-        'data': {
-            'type': 'FeatureCollection',
-            'features': []
-        }
-    }
-    let features = [];
-    for (let i = 0; i < data.length; i++) {
-        let f = {
-            'type': 'Feature',
-            'properties': {
-                'imageID': data[i]['id']
-            },
-            'geometry': {
-                'type': 'Point',
-                'coordinates': [data[i]['longitude'], data[i]['latitude']]
+    if (!MAP.getSource('dots')) {
+        let layerData = {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': []
             }
         }
-        features.push(f);
+        let features = [];
+        for (let i = 0; i < data.length; i++) {
+            let f = {
+                'type': 'Feature',
+                'properties': {
+                    'imageID': data[i]['id']
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [data[i]['longitude'], data[i]['latitude']]
+                }
+            }
+            features.push(f);
+        }
+        layerData['data']['features'] = features;
+        MAP.addSource('dots', layerData);
     }
-    layerData['data']['features'] = features;
-    MAP.addSource('dots', layerData);
-
+    
     MAP.addLayer({
         'id': 'dots',
         'type': 'circle',
@@ -260,6 +262,21 @@ var isMouseOnTrailViewLayer = false;
     });
 }
 
+function checkTrailViewState() {
+    if ($('#trailview_checkbox').is(':checked')) {
+        if (!MAP.getLayer('dots')) {
+            createTrailViewMapLayer(trailViewData);
+        } else {
+            MAP.addLayer('dots');
+        }
+    } else {
+        if (MAP.getLayer('dots')) {
+            MAP.removeLayer('dots');
+        }
+    }
+}
+
+
 /**
  * Called when data has been fetched and 
  * then initializes viewer and map
@@ -278,8 +295,8 @@ var isMouseOnTrailViewLayer = false;
     }, 
     '56aefc085da0466a8bb4139c4515cd0c', data);
 
-    MAP.once('load', () => {
-        createTrailViewMapLayer(data);
+    $('#trailview_checkbox').on('change', () => {
+        checkTrailViewState();
     });
 
     $('#3d_checkbox').on('change', () => {
@@ -373,8 +390,9 @@ function initMap(mapOptions) {
          clickTolerance: 10,
          center: START_CENTER,
          zoom: START_ZOOM,
-         maxPitch: 60,
-         preserveDrawingBuffer: true, // for printing in certain browsers
+         maxPitch: 0,
+         minPitch: 0,
+         preserveDrawingBuffer: true // for printing in certain browsers
      });
 
     // Nav (zoom/tilt) Control
@@ -566,7 +584,9 @@ function showInfoPopup(message, type) {
  */
 function changeBasemap(layer_key) {
     active_layer = STYLE_LAYERS[layer_key];
-    MAP.setStyle(active_layer);
+    MAP.setStyle(active_layer, {
+        diff: false
+    });
     if (active_layer == STYLE_LAYER_CM_SAT) {
         MAP.once('style.load', () => {
             MAP.addSource('mapbox-dem', {
@@ -576,12 +596,12 @@ function changeBasemap(layer_key) {
                 'maxzoom': 14
             });
             MAP.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
-            createTrailViewMapLayer(trailViewData);
+            checkTrailViewState();
         });
     } else {
         MAP.once('style.load', () => {
             MAP.setTerrain(null);
-            createTrailViewMapLayer(trailViewData);
+            checkTrailViewState();
         });
     }
 }
