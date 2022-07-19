@@ -124,40 +124,6 @@ var isMouseOnTrailViewLayer = false;
             currentTrailViewMarker.setLngLat([currTrailViewGeo.longitude, currTrailViewGeo.latitude]);
         }
     }
-
-    // Handle when dots are clicked
-    MAP.on('click', (e) => {
-        let minId = TRAILVIEWER.getNearestImageId(e.lngLat.lat, e.lngLat.lng, 10);
-        if (minId != null) {
-            TRAILVIEWER.goToImageID(minId);
-        }
-
-    });
-
-    // Update visual cursor
-    MAP.on("mouseenter", 'dots', () => {
-        isMouseOnTrailViewLayer = true;
-        MAP.getCanvas().style.cursor = "pointer";
-    });
-
-    MAP.on("mouseleave", 'dots', () => {
-        isMouseOnTrailViewLayer = false;
-        MAP.getCanvas().style.cursor = "grab";
-    });
-
-    MAP.on('mousedown', () => {
-        if (!isMouseOnTrailViewLayer) {
-            MAP.getCanvas().style.cursor = "grabbing";
-        }
-    });
-
-    MAP.on('mouseup', () => {
-        if (isMouseOnTrailViewLayer) {
-            MAP.getCanvas().style.cursor = 'pointer';
-        } else {
-            MAP.getCanvas().style.cursor = 'grab';
-        }
-    });
 }
 
 function checkTrailViewState() {
@@ -178,6 +144,7 @@ function checkTrailViewState() {
         }
         clearInterval(updateMarkerRotationInterval);
         clearInterval(updateNavArrowsInterval);
+        $('new_nav').remove();
         destroyTrailViewer();
     }
 }
@@ -260,6 +227,40 @@ function destroyTrailViewer() {
                     MAP.setMinPitch(0);
                 });
             }, 500);
+        }
+    });
+
+    // Handle when dots are clicked
+    MAP.on('click', (e) => {
+        let minId = TRAILVIEWER.getNearestImageId(e.lngLat.lat, e.lngLat.lng, 10);
+        if (minId != null) {
+            TRAILVIEWER.goToImageID(minId);
+        }
+
+    });
+
+    // Update visual cursor
+    MAP.on("mouseenter", 'dots', () => {
+        isMouseOnTrailViewLayer = true;
+        MAP.getCanvas().style.cursor = "pointer";
+    });
+
+    MAP.on("mouseleave", 'dots', () => {
+        isMouseOnTrailViewLayer = false;
+        MAP.getCanvas().style.cursor = "grab";
+    });
+
+    MAP.on('mousedown', () => {
+        if (!isMouseOnTrailViewLayer) {
+            MAP.getCanvas().style.cursor = "grabbing";
+        }
+    });
+
+    MAP.on('mouseup', () => {
+        if (isMouseOnTrailViewLayer) {
+            MAP.getCanvas().style.cursor = 'pointer';
+        } else {
+            MAP.getCanvas().style.cursor = 'grab';
         }
     });
 }
@@ -391,7 +392,7 @@ function onInitDone(viewer) {
  * Called by setInterval()
  */
  function updateNavArrows() {
-    if (TRAILVIEWER) {
+    if (TRAILVIEWER && TRAILVIEWER._panViewer) {
         // Arrow rotation
         $('.new_nav').each(function (index, element) {
             let yaw = customMod(((360 - angle180to360(TRAILVIEWER._panViewer.getYaw())) + $(element).data('yaw')), 360);
