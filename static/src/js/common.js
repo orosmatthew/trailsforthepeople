@@ -108,11 +108,11 @@ var isMouseOnTrailViewLayer = false;
     if (!currentTrailViewMarker) {
         // Create currentTrailViewMarker icon
         const currentTrailViewMarker_wrap = document.createElement('div');
-        currentTrailViewMarker_wrap.classList.add('marker_current_wrapper');
+        currentTrailViewMarker_wrap.classList.add('marker-current-wrapper');
         const currentTrailViewMarker_div = document.createElement('div');
-        currentTrailViewMarker_div.classList.add('marker_current');
+        currentTrailViewMarker_div.classList.add('marker-current');
         const currentTrailViewMarker_view_div = document.createElement('div');
-        currentTrailViewMarker_view_div.classList.add('marker_viewer');
+        currentTrailViewMarker_view_div.classList.add('marker-viewer');
         currentTrailViewMarker_wrap.appendChild(currentTrailViewMarker_div);
         currentTrailViewMarker_wrap.appendChild(currentTrailViewMarker_view_div);
         currentTrailViewMarker = new mapboxgl.Marker(currentTrailViewMarker_wrap)
@@ -126,7 +126,7 @@ var isMouseOnTrailViewLayer = false;
     }
 }
 
-function checkTrailViewState() {
+function checkTrailViewState(changeFullscreen = true) {
     if ($('#trailview_checkbox').is(':checked')) {
         if (!MAP.getLayer('dots')) {
             createTrailViewMapLayer(trailViewData);
@@ -135,6 +135,9 @@ function checkTrailViewState() {
         }
         createTrailViewer(trailViewData);
     } else {
+        if (changeFullscreen && !isMapFullscreen) {
+            toggleFullscreen(true);
+        }
         if (MAP.getLayer('dots')) {
             MAP.removeLayer('dots');
         }
@@ -187,6 +190,10 @@ function clamp(num, min, max) {
 
     $('#trailview_checkbox').on('change', () => {
         checkTrailViewState();
+    });
+
+    $('#fullscreen_btn').on('click', () => {
+        toggleFullscreen(!isMapFullscreen);
     });
 
     $('#3d_checkbox').on('change', () => {
@@ -326,7 +333,7 @@ function initMap(mapOptions) {
          maxPitch: 60,
          minPitch: 0,
          projection: 'globe',
-         preserveDrawingBuffer: true // for printing in certain browsers
+         preserveDrawingBuffer: false // for printing in certain browsers
      });
 
      MAP.on('style.load', () => {
@@ -412,11 +419,11 @@ function onInitDone(viewer) {
         // Arrow rotation
         $('.new_nav').each(function (index, element) {
             let yaw = customMod(((360 - angle180to360(TRAILVIEWER._panViewer.getYaw())) + $(element).data('yaw')), 360);
-            // if (mapFullscreen) {
-            $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-50px)');
-            // } else {
-            //     $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-100px)');
-            // }
+            if (isMapFullscreen) {
+                $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-50px)');
+            } else {
+                $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-100px)');
+            }
         });
         // Container rotation
         let rot = (TRAILVIEWER._panViewer.getPitch() + 90) / 2.0;
@@ -437,6 +444,40 @@ function onInitDone(viewer) {
     TRAILVIEWER.goToImageID(id);
 }
 
+var isMapFullscreen = true;
+
+function toggleFullscreen(setMapFullscreen) {
+    if (setMapFullscreen && !isMapFullscreen) {
+        $('#viewer_container').removeClass('full-container').addClass('small-container');
+        $('#nav_container').removeClass('nav_container-full').addClass('nav_container-small');
+        $('#map_container').removeClass('small-container').addClass('full-container');
+        $('#fullscreen_btn').detach().appendTo('.small-container');
+        TRAILVIEWER._panViewer.setHfov(100, 500);
+        TRAILVIEWER._panViewer.resize();
+        MAP.resize();
+        isMapFullscreen = true;
+        populateArrows(currentHotspots);
+    } else if (!setMapFullscreen && isMapFullscreen) {
+        $('#viewer_container').removeClass('small-container').addClass('full-container');
+        $('#nav_container').removeClass('nav_container-small').addClass('nav_container-full');
+        $('#map_container').removeClass('full-container').addClass('small-container');
+        $('#fullscreen_btn').detach().appendTo('.small-container');
+        TRAILVIEWER._panViewer.setHfov(120, 500);
+        TRAILVIEWER._panViewer.resize();
+        MAP.resize();
+        isMapFullscreen = false;
+        populateArrows(currentHotspots);
+    }
+    let zoom = MAP.getZoom();
+    zoom = clamp(zoom, 16, 19);
+    MAP.jumpTo({
+        center: currentTrailViewMarker.getLngLat(),
+        zoom: zoom,
+    });
+}
+
+var currentHotspots;
+
 /**
  * 
  * @param {Object} hotspots - JSON object from pannellum config
@@ -450,9 +491,11 @@ function onInitDone(viewer) {
     for (let i = 0; i < hotspots.length; i++) {
         let link = document.createElement('img');
         $(link).addClass('new_nav');
-        // if (mapFullscreen) {
-        $(link).addClass('new_nav-small');
-        // }
+        if (isMapFullscreen) {
+            $(link).addClass('new_nav-small');
+        } else {
+            $(link).addClass('new_nav-full');
+        }
         $(link).attr('src', 'https://trailview.cmparks.net/assets/images/ui/arrow_new_small_white.png');
         $(link).data('yaw', hotspots[i].yaw);
         $(link).data('id', hotspots[i]['clickHandlerArgs']['id']);
@@ -543,12 +586,12 @@ function changeBasemap(layer_key) {
                 'maxzoom': 14
             });
             MAP.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
-            checkTrailViewState();
+            checkTrailViewState(false);
         });
     } else {
         MAP.once('style.load', () => {
             MAP.setTerrain(null);
-            checkTrailViewState();
+            checkTrailViewState(false);
         });
     }
 }

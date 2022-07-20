@@ -195,6 +195,7 @@ module.exports = function(grunt) {
           'static/src/scss/_variables.scss',
           'static/src/scss/sidebar.scss',
           'static/src/scss/map.scss',
+          'static/src/scss/trailview.scss',
           'static/src/scss/fonts.scss',
           'static/src/scss/jqm-themes/cm-jqm-theme.css',
           'static/src/scss/tooltips.scss',
