@@ -174,6 +174,10 @@ function destroyTrailViewer() {
     $('#viewer_container').stop().fadeOut(500);
 }
 
+function clamp(num, min, max) {
+    return Math.min(Math.max(num, min), max);
+} 
+
 /**
  * Called when data has been fetched and 
  * then initializes viewer and map
@@ -187,18 +191,21 @@ function destroyTrailViewer() {
 
     $('#3d_checkbox').on('change', () => {
         if ($('#3d_checkbox').is(':checked')) {
-            changeBasemap('photo');
             MAP.setMaxPitch(60);
             MAP.setMinPitch(0);
+            changeBasemap('photo');
             let orbit_pos = MAP.getCenter();
             if (currentTrailViewMarker) {
                 orbit_pos = currentTrailViewMarker.getLngLat();
             }
+            let zoom = MAP.getZoom();
+            zoom = clamp(zoom, 16, 19);
             setTimeout(() => {
                 MAP.easeTo({
                     center: orbit_pos,
                     pitch: 60,
                     bearing: MAP.getBearing() + 179,
+                    zoom: zoom,
                     easing: (x) => (1 - Math.cos((x * Math.PI) / 2)),
                     duration: 3000,
                 }).once('moveend', () => {
@@ -222,9 +229,6 @@ function destroyTrailViewer() {
                     pitch: 0,
                     duration: 500,
                     bearing: 0,
-                }).once('moveend', () => {
-                    MAP.setMaxPitch(0);
-                    MAP.setMinPitch(0);
                 });
             }, 500);
         }
@@ -319,10 +323,21 @@ function initMap(mapOptions) {
          clickTolerance: 10,
          center: START_CENTER,
          zoom: START_ZOOM,
-         maxPitch: 0,
+         maxPitch: 60,
          minPitch: 0,
+         projection: 'globe',
          preserveDrawingBuffer: true // for printing in certain browsers
      });
+
+     MAP.on('style.load', () => {
+        MAP.setFog({
+            color: 'rgb(186, 210, 235)', // Lower atmosphere
+            'high-color': 'rgb(36, 92, 223)', // Upper atmosphere
+            'horizon-blend': 0.02, // Atmosphere thickness (default 0.2 at low zooms)
+            'space-color': 'rgb(11, 11, 25)', // Background color
+            'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
+        });
+    });
 
     // Nav (zoom/tilt) Control
     var ctrlNav = new mapboxgl.NavigationControl();
