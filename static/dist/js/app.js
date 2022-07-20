@@ -68,7 +68,7 @@ var START_ZOOM = 14;
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2xldmVsYW5kLW1ldHJvcGFya3MiLCJhIjoiWHRKaDhuRSJ9.FGqNSOHwiCr2dmTH2JTMAA';
 
 // Mapbox styles (baselayers)
-var STYLE_LAYER_CM_MAP = 'mapbox://styles/cleveland-metroparks/cisvvmgwe00112xlk4jnmrehn'; // Vector
+var STYLE_LAYER_CM_MAP = 'mapbox://styles/cleveland-metroparks/cisvvmgwe00112xlk4jnmrehn?optimize=true'; // Vector
 var STYLE_LAYER_CM_SAT = 'mapbox://styles/cleveland-metroparks/cjcutetjg07892ro6wunp2da9?optimize=true'; // Satellite
 
 var STYLE_LAYERS = {
@@ -416,19 +416,8 @@ function initMap(mapOptions) {
          zoom: START_ZOOM,
          maxPitch: 60,
          minPitch: 0,
-         projection: 'globe',
          preserveDrawingBuffer: false // for printing in certain browsers
      });
-
-     MAP.on('style.load', () => {
-        MAP.setFog({
-            color: 'rgb(186, 210, 235)', // Lower atmosphere
-            'high-color': 'rgb(36, 92, 223)', // Upper atmosphere
-            'horizon-blend': 0.02, // Atmosphere thickness (default 0.2 at low zooms)
-            'space-color': 'rgb(11, 11, 25)', // Background color
-            'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
-        });
-    });
 
     // Nav (zoom/tilt) Control
     var ctrlNav = new mapboxgl.NavigationControl();
