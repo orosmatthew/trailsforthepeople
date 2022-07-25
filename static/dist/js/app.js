@@ -108,6 +108,14 @@ SETTINGS.coordinate_format = 'dms';
 var currentTrailViewMarker = null;
 var currTrailViewGeo = null;
 var isMouseOnTrailViewLayer = false;
+var trailViewData = null;
+var isMobileView = false;
+var isTrailViewEnabled = false;
+var fullElement = 'map';
+var isMap3D = false;
+var updateMarkerRotationInterval = null;
+var updateNavArrowsInterval = null;
+var currentHotspots;
 
 /**
  * Creates TrailView map layer for dots
@@ -210,24 +218,21 @@ var isMouseOnTrailViewLayer = false;
     }
 }
 
-function checkTrailViewState(changeContainers = true) {
+/**
+ * Updates TrailViewer and map layer after changes
+ * regarding map state and whether it is enabled
+ */
+function updateTrailView() {
     if ($('#trailview_checkbox').is(':checked')) {
         if (!MAP.getLayer('dots')) {
             createTrailViewMapLayer(trailViewData);
         } else {
             MAP.addLayer('dots');
         }
-        createTrailViewer(trailViewData);
-        isTrailViewEnabled = true;
-        if (changeContainers) {
-            if (isMobileView == true) {
-                fullElement = null;
-            } else {
-                fullElement = 'map';
-            }
-            updateContainers();
-            $('#sidebar').show();
+        if (!TRAILVIEWER) {
+            createTrailViewer();
         }
+        isTrailViewEnabled = true;
     } else {
         if (MAP.getLayer('dots')) {
             MAP.removeLayer('dots');
@@ -241,29 +246,30 @@ function checkTrailViewState(changeContainers = true) {
         $('new_nav').remove();
         destroyTrailViewer();
         isTrailViewEnabled = false;
-        if (changeContainers) {
-            updateContainers();
-        }
     }
 }
 
-
-function createTrailViewer(data) {
+/**
+ * Creates TrailViewer
+ */
+function createTrailViewer() {
     if (!TRAILVIEWER) {
         TRAILVIEWER = new TrailViewer({
             'useURLHashing': false, 
             'onGeoChangeFunc': onGeoChange,
-            // 'onSceneChangeFunc': onSceneChange,
             'onInitDoneFunc': onInitDone,
             'onArrowsAddedFunc': populateArrows,
             'navArrowMinAngle': -25,
             'navArrowMaxAngle': -20,
         }, 
-        null, data, MAP.getCenter().lat, MAP.getCenter().lng);
-        $('#viewer_container').stop().fadeIn(500);$('#viewer_container').stop().fadeIn(500);
+        null, trailViewData, MAP.getCenter().lat, MAP.getCenter().lng);
+        $('#viewer_container').stop().fadeIn(500);
     }
 }
 
+/**
+ * Destroys TrailViewer
+ */
 function destroyTrailViewer() {
     if (TRAILVIEWER) {
         TRAILVIEWER.destroy();
@@ -272,16 +278,25 @@ function destroyTrailViewer() {
     $('#viewer_container').stop().fadeOut(500);
 }
 
+/**
+ * Clamps number
+ * @param {Number} num - value to be clamped
+ * @param {Number} min - minimum
+ * @param {Number} max - maximum
+ * @returns {Number} - clamped number
+ */
 function clamp(num, min, max) {
     return Math.min(Math.max(num, min), max);
 } 
 
-window.addEventListener('resize', () => {
-    onWindowResize();
-});
+/**
+ * Register event listener for window resizing
+ */
+window.addEventListener('resize', onWindowResize);
 
-var isTrailViewMobile = false;
-
+/**
+ * Calls resize on map and TrailViewer
+ */
 function resizeElements() {
     if (TRAILVIEWER && TRAILVIEWER._panViewer) {
         TRAILVIEWER._panViewer.resize();
@@ -291,10 +306,9 @@ function resizeElements() {
     }
 }
 
-var isMobileView = false;
-var isTrailViewEnabled = false;
-var fullElement = 'map';
-
+/**
+ * Updates map and TrailViewer containers on fullscreen or mobile changes
+ */
 function updateContainers() {
     if (isTrailViewEnabled) {
         $('#map_fullscreen_btn').show();
@@ -336,37 +350,45 @@ function updateContainers() {
     resizeElements();
 }
 
+/**
+ * Called when window is resized
+ */
 function onWindowResize() {
-    if (!isMobileView && window.innerWidth < 768) {
+    if (!isMobileView && window.innerWidth < 1024) {
         isMobileView = true;
         fullElement = null;
         updateContainers();
-    } else if (isMobileView && window.innerWidth >= 768) {
+    } else if (isMobileView && window.innerWidth >= 1024) {
         isMobileView = false;
         fullElement = 'map';
         updateContainers();
     }
 }
 
-var is3D = false;
+
 
 /**
  * Called when data has been fetched and 
  * then initializes viewer and map
- * @param {Object} data 
  */
- function initTrailView(data) {
+ function initTrailView() {
 
     onWindowResize();
 
     $('#trailview_checkbox').on('change', () => {
-        checkTrailViewState();
+        updateTrailView();
+        if (isTrailViewEnabled) {
+            if (isMobileView == true) {
+                fullElement = null;
+            } else {
+                fullElement = 'map';
+            }
+        }
+        updateContainers();
+        $('#sidebar').show();
     });
 
-    $('#fullscreen_btn').on('click', () => {
-        toggleFullscreen(!isMapFullscreen);
-    });
-
+    // When fullscreen buttons are clicked
     $('#map_fullscreen_btn').on('click', () => {
         if (isMobileView) {
             if (fullElement == 'map') {
@@ -402,7 +424,7 @@ var is3D = false;
     });
 
     $('#3d_btn').on('click', () => {
-        if (!is3D) {
+        if (!isMap3D) {
             MAP.setMaxPitch(60);
             MAP.setMinPitch(0);
             changeBasemap('photo');
@@ -428,7 +450,7 @@ var is3D = false;
                     })
                 });
             }, 500);
-            is3D = true;
+            isMap3D = true;
         } else {
             changeBasemap('map');
             MAP.stop();
@@ -444,52 +466,7 @@ var is3D = false;
                     bearing: 0,
                 });
             }, 500);
-            is3D = false;
-        }
-    });
-
-    $('#3d_checkbox').on('change', () => {
-        if ($('#3d_checkbox').is(':checked')) {
-            MAP.setMaxPitch(60);
-            MAP.setMinPitch(0);
-            changeBasemap('photo');
-            let orbit_pos = MAP.getCenter();
-            if (currentTrailViewMarker) {
-                orbit_pos = currentTrailViewMarker.getLngLat();
-            }
-            let zoom = MAP.getZoom();
-            zoom = clamp(zoom, 16, 19);
-            setTimeout(() => {
-                MAP.easeTo({
-                    center: orbit_pos,
-                    pitch: 60,
-                    bearing: MAP.getBearing() + 179,
-                    zoom: zoom,
-                    easing: (x) => (1 - Math.cos((x * Math.PI) / 2)),
-                    duration: 3000,
-                }).once('moveend', () => {
-                    MAP.easeTo({
-                        bearing: MAP.getBearing() + 179,
-                        duration: 7000,
-                        easing: (x) => Math.sin((x * Math.PI) / 2),
-                    })
-                });
-            }, 500);
-        } else {
-            changeBasemap('map');
-            MAP.stop();
-            let orbit_pos = MAP.getCenter();
-            if (currentTrailViewMarker) {
-                orbit_pos = currentTrailViewMarker.getLngLat();
-            }
-            setTimeout(() => {
-                MAP.easeTo({
-                    center: orbit_pos,
-                    pitch: 0,
-                    duration: 500,
-                    bearing: 0,
-                });
-            }, 500);
+            isMap3D = false;
         }
     });
 
@@ -533,8 +510,6 @@ var is3D = false;
     });
 }
 
-var trailViewData = null;
-
 /**
  * Fetches base data for points
  */
@@ -544,12 +519,10 @@ var trailViewData = null;
         },
         function (data, textStatus, jqXHR) {
             trailViewData = data['imagesStandard'];
-            initTrailView(data['imagesStandard']);
+            initTrailView();
         }
     );
 }
-
-
 
 /**
  * Initialize the map
@@ -642,9 +615,6 @@ function initMap(mapOptions) {
     }
 }
 
-var updateMarkerRotationInterval = null;
-var updateNavArrowsInterval = null;
-
 /**
  * Called when viewer initialization is done
  * @param {TrailViewer} viewer
@@ -689,42 +659,8 @@ function onInitDone(viewer) {
     TRAILVIEWER.goToImageID(id);
 }
 
-var isMapFullscreen = true;
-
-function toggleFullscreen(setMapFullscreen) {
-    if (setMapFullscreen && !isMapFullscreen) {
-        $('#viewer_container').removeClass('full-container').addClass('small-container');
-        $('#nav_container').removeClass('nav_container-full').addClass('nav_container-small');
-        $('#map_container').removeClass('small-container').addClass('full-container');
-        $('#fullscreen_btn').detach().appendTo('.small-container');
-        TRAILVIEWER._panViewer.setHfov(100, 500);
-        TRAILVIEWER._panViewer.resize();
-        MAP.resize();
-        isMapFullscreen = true;
-        populateArrows(currentHotspots);
-    } else if (!setMapFullscreen && isMapFullscreen) {
-        $('#viewer_container').removeClass('small-container').addClass('full-container');
-        $('#nav_container').removeClass('nav_container-small').addClass('nav_container-full');
-        $('#map_container').removeClass('full-container').addClass('small-container');
-        $('#fullscreen_btn').detach().appendTo('.small-container');
-        TRAILVIEWER._panViewer.setHfov(120, 500);
-        TRAILVIEWER._panViewer.resize();
-        MAP.resize();
-        isMapFullscreen = false;
-        populateArrows(currentHotspots);
-    }
-    let zoom = MAP.getZoom();
-    zoom = clamp(zoom, 16, 19);
-    MAP.jumpTo({
-        center: currentTrailViewMarker.getLngLat(),
-        zoom: zoom,
-    });
-}
-
-var currentHotspots;
-
 /**
- * 
+ * Populates navigation arrows
  * @param {Object} hotspots - JSON object from pannellum config
  */
  function populateArrows(hotspots) {
@@ -833,12 +769,12 @@ function changeBasemap(layer_key) {
                 'maxzoom': 14
             });
             MAP.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
-            checkTrailViewState(false);
+            updateTrailView();
         });
     } else {
         MAP.once('style.load', () => {
             MAP.setTerrain(null);
-            checkTrailViewState(false);
+            updateTrailView();
         });
     }
 }
