@@ -28,6 +28,23 @@
     overflow: hidden;
 }
 
+.top-container {
+    width: 100%;
+    height: 50%;
+    position: absolute;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+}
+
+.bottom-container {
+    width: 100%;
+    height: 50%;
+    position: absolute;
+    overflow: hidden;
+    transform: translateY(100%);
+}
+
 //
 // For TrailView current marker on map
 // 
