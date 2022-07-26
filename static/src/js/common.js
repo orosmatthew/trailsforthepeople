@@ -21,16 +21,28 @@ var SETTINGS = [];
 // We'll get this from localStorage on document ready
 SETTINGS.coordinate_format = 'dms';
 
+// Marker that indicates TrailView location on map
 var currentTrailViewMarker = null;
+// Current TrailView location in {'lat', 'lon'}
 var currTrailViewGeo = null;
+// If Mouse is over a dot (used for changing cursor style)
 var isMouseOnTrailViewLayer = false;
+// TrailView base image metadata (fetched on page load)
 var trailViewData = null;
+// If TrailView is in mobile/split view
 var isMobileView = false;
+// If TrailView is enabled
 var isTrailViewEnabled = false;
-var fullElement = 'map';
+// Whether the map or viewer is fullscreen
+//     Values can be 'map', 'viewer', or null
+var fullscreenElement = 'map';
+// If map is in 3D mode
 var isMap3D = false;
+// Intervals for updating current TrailView marker rotation
+//     and nav arrow rotation
 var updateMarkerRotationInterval = null;
 var updateNavArrowsInterval = null;
+// The current TrailViewer hotspots (used for updating nav arrows)
 var currentHotspots;
 
 /**
@@ -228,7 +240,7 @@ function resizeElements() {
 function updateContainers() {
     if (isTrailViewEnabled) {
         $('#map_fullscreen_btn').show();
-        if (fullElement == 'map') {
+        if (fullscreenElement == 'map') {
             TRAILVIEWER._panViewer.setHfov(120, 500);
             $('#sidebar').show();
             $('#map_container').show();
@@ -239,7 +251,7 @@ function updateContainers() {
                 $('#viewer_container').show().removeClass().addClass('small-container');
                 populateArrows(currentHotspots);
             }
-        } else if (fullElement == 'viewer') {
+        } else if (fullscreenElement == 'viewer') {
             if (isMobileView) {
                 TRAILVIEWER._panViewer.setHfov(90, 500);
                 $('#sidebar').hide();
@@ -272,11 +284,11 @@ function updateContainers() {
 function onWindowResize() {
     if (!isMobileView && window.innerWidth < 1024) {
         isMobileView = true;
-        fullElement = null;
+        fullscreenElement = null;
         updateContainers();
     } else if (isMobileView && window.innerWidth >= 1024) {
         isMobileView = false;
-        fullElement = 'map';
+        fullscreenElement = 'map';
         updateContainers();
     }
 }
@@ -295,9 +307,9 @@ function onWindowResize() {
         updateTrailView();
         if (isTrailViewEnabled) {
             if (isMobileView == true) {
-                fullElement = null;
+                fullscreenElement = null;
             } else {
-                fullElement = 'map';
+                fullscreenElement = 'map';
             }
         }
         updateContainers();
@@ -307,16 +319,16 @@ function onWindowResize() {
     // When fullscreen buttons are clicked
     $('#map_fullscreen_btn').on('click', () => {
         if (isMobileView) {
-            if (fullElement == 'map') {
-                fullElement = null;
+            if (fullscreenElement == 'map') {
+                fullscreenElement = null;
             } else {
-                fullElement = 'map';
+                fullscreenElement = 'map';
             }
         } else {
-            if (fullElement == 'map') {
-                fullElement = 'viewer';
+            if (fullscreenElement == 'map') {
+                fullscreenElement = 'viewer';
             } else {
-                fullElement = 'map';
+                fullscreenElement = 'map';
             }
         }
         updateContainers();
@@ -324,16 +336,16 @@ function onWindowResize() {
 
     $('#viewer_fullscreen_btn').on('click', () => {
         if (isMobileView) {
-            if (fullElement == 'viewer') {
-                fullElement = null;
+            if (fullscreenElement == 'viewer') {
+                fullscreenElement = null;
             } else {
-                fullElement = 'viewer';
+                fullscreenElement = 'viewer';
             }
         } else {
-            if (fullElement == 'viewer') {
-                fullElement = 'map';
+            if (fullscreenElement == 'viewer') {
+                fullscreenElement = 'map';
             } else {
-                fullElement = 'viewer';
+                fullscreenElement = 'viewer';
             }
         }
         updateContainers();
@@ -391,8 +403,8 @@ function onWindowResize() {
         if (TRAILVIEWER) {
             let minId = TRAILVIEWER.getNearestImageId(e.lngLat.lat, e.lngLat.lng, 10);
             if (minId != null) {
-                if (isMobileView && fullElement == 'map') {
-                    fullElement = null;
+                if (isMobileView && fullscreenElement == 'map') {
+                    fullscreenElement = null;
                     updateContainers();
                 }
                 TRAILVIEWER.goToImageID(minId);
@@ -550,7 +562,7 @@ function onInitDone(viewer) {
         // Arrow rotation
         $('.new_nav').each(function (index, element) {
             let yaw = customMod(((360 - angle180to360(TRAILVIEWER._panViewer.getYaw())) + $(element).data('yaw')), 360);
-            if (fullElement == 'viewer') {
+            if (fullscreenElement == 'viewer') {
                 $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-100px)');
             } else {
                 $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-50px)');
@@ -588,7 +600,7 @@ function onInitDone(viewer) {
     for (let i = 0; i < hotspots.length; i++) {
         let link = document.createElement('img');
         $(link).addClass('new_nav');
-        if (fullElement == 'viewer') {
+        if (fullscreenElement == 'viewer') {
             $('#nav_container').removeClass('nav_container-small').addClass('nav_container-full');
             $(link).addClass('new_nav-full');
         } else {
