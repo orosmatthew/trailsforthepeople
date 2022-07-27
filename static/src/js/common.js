@@ -316,6 +316,16 @@ function onWindowResize() {
         $('#sidebar').show();
     });
 
+    $('#viewer_zoom_in_btn').on('click', () => {
+        let currFov = TRAILVIEWER._panViewer.getHfov();
+        TRAILVIEWER._panViewer.setHfov(currFov - 20, 200);
+    });
+
+    $('#viewer_zoom_out_btn').on('click', () => {
+        let currFov = TRAILVIEWER._panViewer.getHfov();
+        TRAILVIEWER._panViewer.setHfov(currFov + 20, 200);
+    });
+
     // When fullscreen buttons are clicked
     $('#map_fullscreen_btn').on('click', () => {
         if (isMobileView) {
