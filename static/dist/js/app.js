@@ -530,6 +530,8 @@ function onWindowResize() {
             MAP.getCanvas().style.cursor = 'grab';
         }
     });
+
+    $('#trailview_checkbox_container').show(500);
 }
 
 /**
@@ -542,6 +544,7 @@ function onWindowResize() {
         function (data, textStatus, jqXHR) {
             trailViewData = data['imagesStandard'];
             initTrailView();
+
         }
     );
 }
