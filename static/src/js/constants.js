@@ -17,8 +17,6 @@ var WEBAPP_BASEPATH = '/';
 var API_BASEPATH = '/';
 var MAP = null;
 
-var TRAILVIEWER = null;
-
 var API_NEW_HOST = 'maps-api-dev2.clevelandmetroparks.com';
 var API_NEW_PROTOCOL = 'https:';
 var API_NEW_BASEPATH = '/api/v1/';
@@ -80,3 +78,5 @@ var STYLE_NAMES = {
     'CM Light' : 'map',
     'CM-Aerial' : 'photo'
 };
+
+var IS_TRAILVIEW_ENABLED = true;   // Also enable/disable in Gruntfile.js

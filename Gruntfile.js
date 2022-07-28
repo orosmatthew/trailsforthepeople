@@ -31,6 +31,7 @@ module.exports = function(grunt) {
           'static/src/js/nearby.js',
           'static/src/js/trails.js',
           'static/dist/js/handlebars-templates.js',
+          'static/src/js/trailview.js',   // Also enable/disable IS_TRAILVIEW_ENABLED in static/js/constants.js
           // 'static/src/js/print.js'
         ],
         dest: 'static/dist/js/app.js'

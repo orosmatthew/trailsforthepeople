@@ -79,7 +79,9 @@ function switchToMap() {
 $(document).ready(function () {
     loadMapAndStartingState();
     populateSidebarPanes();
-    fetchTrailViewData();
+    if (IS_TRAILVIEW_ENABLED) {
+        fetchTrailViewData();
+    }
 });
 
 /**
