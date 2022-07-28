@@ -410,6 +410,18 @@ function onWindowResize() {
         TRAILVIEWER._panViewer.setHfov(currFov + 20, 200);
     });
 
+    $('#viewer_orient_btn').on('click', () => {
+        if (TRAILVIEWER._panViewer) {
+            if (TRAILVIEWER._panViewer.isOrientationActive()) {
+                TRAILVIEWER._panViewer.stopOrientation();
+                isViewerOrientationActive = false;
+            } else {
+                TRAILVIEWER._panViewer.startOrientation();
+                isViewerOrientationActive = true;
+            }
+        }
+    });
+
     // When fullscreen buttons are clicked
     $('#map_fullscreen_btn').on('click', () => {
         if (isMobileView) {
@@ -648,6 +660,9 @@ function onInitDone(viewer) {
     viewer._panViewer.resize();
     updateMarkerRotationInterval = setInterval(updateMarkerRotation, 16);
     updateNavArrowsInterval = setInterval(updateNavArrows, 16);
+    if (viewer._panViewer.isOrientationSupported()) {
+        $('#viewer_orient_btn').show(500);
+    }
 }
 
 /**
