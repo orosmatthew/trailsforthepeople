@@ -10,7 +10,7 @@ window.Tooltip = require('tooltip.js');
 window.Handlebars = require("handlebars");
 window.Fuse = require('fuse.js');
 window.Chart = require('chart.js');
-
+window.CheapRuler = require('cheap-ruler');
 
 /**
  * Disable jQuery Mobile's history manipulation.
