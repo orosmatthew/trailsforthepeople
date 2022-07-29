@@ -229,7 +229,9 @@ function updateContainers() {
             } else {
                 $('#viewer_container').show().removeClass().addClass('small-container');
                 populateArrows(currentHotspots);
+                $('#map_fullscreen_btn').hide();
             }
+            $('#viewer_fullscreen_btn').show();
         } else if (fullscreenElement == 'viewer') {
             if (isMobileView) {
                 TRAILVIEWER._panViewer.setHfov(90, 500);
@@ -238,7 +240,9 @@ function updateContainers() {
             } else {
                 TRAILVIEWER._panViewer.setHfov(120, 500);
                 $('#map_container').show().removeClass().addClass('small-container');
+                $('#viewer_fullscreen_btn').hide();
             }
+            $('#map_fullscreen_btn').show();
             $('#viewer_container').show().removeClass().addClass('full-container');
             populateArrows(currentHotspots);
         } else {
@@ -447,7 +451,7 @@ function onWindowResize() {
  * Fetches base data for points
  */
  function fetchTrailViewData() {
-    $.getJSON("https://trailview.cmparks.net/api/images.php", {
+    $.getJSON(TRAILVIEW_URL + '/api/images.php', {
         'type': 'standard'
         },
         function (data, textStatus, jqXHR) {

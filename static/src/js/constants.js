@@ -80,3 +80,5 @@ var STYLE_NAMES = {
 };
 
 var IS_TRAILVIEW_ENABLED = true;   // Also enable/disable in Gruntfile.js
+
+var TRAILVIEW_URL = "https://trailview.cmparks.net"     // Do not include trailing slash
