@@ -214,6 +214,7 @@ function updateContainers() {
             if (isMobileView) {
                 $('#viewer_container').hide();
             } else {
+                $('#viewer_close_btn').css('left', '8px');
                 $('#viewer_container').show().removeClass().addClass('small-container');
                 populateArrows(currentHotspots);
                 $('#map_fullscreen_btn').hide();
@@ -231,6 +232,7 @@ function updateContainers() {
             }
             $('#map_fullscreen_btn').show();
             $('#viewer_container').show().removeClass().addClass('full-container');
+            $('#viewer_close_btn').css('left', '58px');
             populateArrows(currentHotspots);
         } else {
             $('#viewer_fullscreen_btn').show();
@@ -239,6 +241,7 @@ function updateContainers() {
             $('#sidebar').show();
             $('#map_container').show().removeClass().addClass('bottom-container');
             $('#viewer_container').show().removeClass().addClass('top-container');
+            $('#viewer_close_btn').css('left', '58px');
             populateArrows(currentHotspots);
         }
     } else {
@@ -391,6 +394,10 @@ function onWindowResize() {
             $('#trailview_checkbox').prop('checked', true);
         }
         $('#trailview_checkbox').trigger('change').checkboxradio('refresh');
+    });
+
+    $('#viewer_close_btn').on('click', () => {
+        $('#trailview_checkbox').prop('checked', false).trigger('change').checkboxradio('refresh');
     });
 
     $('#trailview_checkbox_label').show(500);

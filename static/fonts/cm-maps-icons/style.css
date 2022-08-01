@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'cm-maps-icons';
-  src:  url('fonts/cm-maps-icons.eot?v8mx9d');
-  src:  url('fonts/cm-maps-icons.eot?v8mx9d#iefix') format('embedded-opentype'),
-    url('fonts/cm-maps-icons.ttf?v8mx9d') format('truetype'),
-    url('fonts/cm-maps-icons.woff?v8mx9d') format('woff'),
-    url('fonts/cm-maps-icons.svg?v8mx9d#cm-maps-icons') format('svg');
+  src:  url('fonts/cm-maps-icons.eot?5cjch0');
+  src:  url('fonts/cm-maps-icons.eot?5cjch0#iefix') format('embedded-opentype'),
+    url('fonts/cm-maps-icons.ttf?5cjch0') format('truetype'),
+    url('fonts/cm-maps-icons.woff?5cjch0') format('woff'),
+    url('fonts/cm-maps-icons.svg?5cjch0#cm-maps-icons') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -42,6 +42,9 @@
 }
 .cm-icon-zoomin:before {
   content: "\e93a";
+}
+.cm-icon-close:before {
+  content: "\e93c";
 }
 .cm-icon-expand:before {
   content: "\e938";
