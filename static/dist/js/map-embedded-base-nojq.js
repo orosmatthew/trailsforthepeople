@@ -2723,33 +2723,96 @@ function showInfoPopup(message, type) {
 }
 
 /**
+ * Clamps number
+ * @param {Number} num - value to be clamped
+ * @param {Number} min - minimum
+ * @param {Number} max - maximum
+ * @returns {Number} - clamped number
+ */
+ function clamp(num, min, max) {
+    return Math.min(Math.max(num, min), max);
+} 
+
+/**
  * Enable the given base map layer.
  *
  * @param layer_key: Must refer to the key of an available layer (in STYLE_LAYERS constant).
  */
 function changeBasemap(layer_key) {
-    active_layer = STYLE_LAYERS[layer_key];
+    switch (layer_key) {
+        case 'map':
+            active_layer = STYLE_LAYERS['map'];
+            break;
+        case 'photo':
+            active_layer = STYLE_LAYERS['photo'];
+            break;
+        case 'terrain':
+            active_layer = STYLE_LAYERS['photo'];
+            break;
+    }
     MAP.setStyle(active_layer, {
         diff: false
     });
-    if (active_layer == STYLE_LAYER_CM_SAT) {
+    if (layer_key == 'terrain') {
         MAP.once('style.load', () => {
+            MAP.addSource('mapbox-dem', {
+                'type': 'raster-dem',
+                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1?optimize=true',
+                'tileSize': 256,
+                'maxzoom': 14
+            });
+            MAP.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
+
+            MAP.setMaxPitch(60);
+            MAP.setMinPitch(0);
+
+            let orbit_pos = MAP.getCenter();
             if (IS_TRAILVIEW_ENABLED) {
-                MAP.addSource('mapbox-dem', {
-                    'type': 'raster-dem',
-                    'url': 'mapbox://mapbox.mapbox-terrain-dem-v1?optimize=true',
-                    'tileSize': 256,
-                    'maxzoom': 14
+                if (currentTrailViewMarker) {
+                    orbit_pos = currentTrailViewMarker.getLngLat();
+                }
+            }
+            let zoom = MAP.getZoom();
+            zoom = clamp(zoom, 16, 19);
+            setTimeout(() => {
+                MAP.easeTo({
+                    center: orbit_pos,
+                    pitch: 60,
+                    bearing: MAP.getBearing() + 179,
+                    zoom: zoom,
+                    easing: (x) => (1 - Math.cos((x * Math.PI) / 2)),
+                    duration: 3000,
+                }).once('moveend', () => {
+                    MAP.easeTo({
+                        bearing: MAP.getBearing() + 179,
+                        duration: 7000,
+                        easing: (x) => Math.sin((x * Math.PI) / 2),
+                    })
                 });
-                MAP.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
-                
+            }, 500);
+            if (IS_TRAILVIEW_ENABLED) {
                 updateTrailView();
             }
         });
     } else {
         MAP.once('style.load', () => {
+            MAP.setTerrain(null);
+            MAP.stop();
+            let orbit_pos = MAP.getCenter();
             if (IS_TRAILVIEW_ENABLED) {
-                MAP.setTerrain(null);
+                if (currentTrailViewMarker) {
+                    orbit_pos = currentTrailViewMarker.getLngLat();
+                }
+            }
+            setTimeout(() => {
+                MAP.easeTo({
+                    center: orbit_pos,
+                    pitch: 0,
+                    duration: 500,
+                    bearing: 0,
+                });
+            }, 500);
+            if (IS_TRAILVIEW_ENABLED) {
                 updateTrailView();
             }
         });

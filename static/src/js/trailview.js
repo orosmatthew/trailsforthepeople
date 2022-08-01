@@ -15,8 +15,6 @@ var isTrailViewEnabled = false;
 // Whether the map or viewer is fullscreen
 //     Values can be 'map', 'viewer', or null
 var fullscreenElement = 'map';
-// If map is in 3D mode
-var isMap3D = false;
 // Intervals for updating current TrailView marker rotation
 //     and nav arrow rotation
 var updateMarkerRotationInterval = null;
@@ -186,17 +184,6 @@ function destroyTrailViewer() {
 }
 
 /**
- * Clamps number
- * @param {Number} num - value to be clamped
- * @param {Number} min - minimum
- * @param {Number} max - maximum
- * @returns {Number} - clamped number
- */
-function clamp(num, min, max) {
-    return Math.min(Math.max(num, min), max);
-} 
-
-/**
  * Register event listener for window resizing
  */
 window.addEventListener('resize', onWindowResize);
@@ -288,8 +275,6 @@ function onWindowResize() {
 
     onWindowResize();
 
-    $('#3d_btn').show();
-
     $('#trailview_checkbox').on('change', () => {
         updateTrailView();
         if (isTrailViewEnabled) {
@@ -358,53 +343,6 @@ function onWindowResize() {
             }
         }
         updateContainers();
-    });
-
-    $('#3d_btn').on('click', () => {
-        if (!isMap3D) {
-            MAP.setMaxPitch(60);
-            MAP.setMinPitch(0);
-            changeBasemap('photo');
-            let orbit_pos = MAP.getCenter();
-            if (currentTrailViewMarker) {
-                orbit_pos = currentTrailViewMarker.getLngLat();
-            }
-            let zoom = MAP.getZoom();
-            zoom = clamp(zoom, 16, 19);
-            setTimeout(() => {
-                MAP.easeTo({
-                    center: orbit_pos,
-                    pitch: 60,
-                    bearing: MAP.getBearing() + 179,
-                    zoom: zoom,
-                    easing: (x) => (1 - Math.cos((x * Math.PI) / 2)),
-                    duration: 3000,
-                }).once('moveend', () => {
-                    MAP.easeTo({
-                        bearing: MAP.getBearing() + 179,
-                        duration: 7000,
-                        easing: (x) => Math.sin((x * Math.PI) / 2),
-                    })
-                });
-            }, 500);
-            isMap3D = true;
-        } else {
-            changeBasemap('map');
-            MAP.stop();
-            let orbit_pos = MAP.getCenter();
-            if (currentTrailViewMarker) {
-                orbit_pos = currentTrailViewMarker.getLngLat();
-            }
-            setTimeout(() => {
-                MAP.easeTo({
-                    center: orbit_pos,
-                    pitch: 0,
-                    duration: 500,
-                    bearing: 0,
-                });
-            }, 500);
-            isMap3D = false;
-        }
     });
 
     // Handle when dots are clicked

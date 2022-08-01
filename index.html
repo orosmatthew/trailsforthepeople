@@ -79,6 +79,7 @@
             <li><a href="#pane-browse" role="tab" title="Find"><i class="cm-icon cm-icon-search"></i></a></li>
             <li><a href="#pane-nearby" role="tab" title="Nearby"><i class="cm-icon cm-icon-location-arrow"></i></a></li>
             <li><a href="#pane-directions" role="tab" title="Directions"><i class="cm-icon cm-icon-directions"></i></a></li>
+            <li><a href="#pane-layers" role="tab" title="Layers"><i style="font-weight: bold;" class="cm-icon cm-icon-layers"></i></a></li>
             <li><a href="#pane-share" role="tab" title="Share"><i class="cm-icon cm-icon-share-alt"></i></a></li>
         </ul>
 
@@ -267,6 +268,21 @@
             <ul id="directions-steps" data-role="listview"></ul>
         </div>
         <!-- /#pane-directions -->
+
+        <!-- Sidebar Pane: Layers: #pane-layers -->
+        <div class="sidebar-pane" id="pane-layers">
+            <h1 class="sidebar-header">
+                <span class="title-text">Map Layers</span>
+                <span class="sidebar-close"><i class="cm-icon cm-icon-caret-left"></i></span>
+            </h1>
+
+            <fieldset id="map_type" data-role="controlgroup">
+                <label><input type="radio" name="basemap" value="map" checked="true" />Default</label>
+                <label><input type="radio" name="basemap" value="photo" />Satellite</label>
+                <label><input type="radio" name="basemap" value="terrain" />3D Terrain</label>
+            </fieldset>
+        </div>
+        <!-- /#pane-layers -->
 
         <!-- Sidebar Pane: Share: #pane-share -->
         <div class="sidebar-pane" id="pane-share">
@@ -625,7 +641,6 @@
 <div id="map_container" class="full-container">
     <div id="map_canvas" class="sidebar-map"></div>`
     <button id="map_fullscreen_btn" style="position: absolute; top: 6px; right: 8px; display: none; font-size: 16pt; font-weight: lighter;" data-role="none" class="trailview-ui-button"><i class="cm-icon cm-icon-expand"></i></button>`
-    <button id="3d_btn" style="position: absolute; bottom: 190px; right: 8px; font-size: 20pt; display: none;" data-role="none" class="trailview-ui-button"><i class="cm-icon cm-icon-rotate3d"></i></button>`
 </div>
 
 <div id="viewer_container" class="small-container" hidden>
