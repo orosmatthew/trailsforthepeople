@@ -276,7 +276,6 @@ function onWindowResize() {
     onWindowResize();
 
     $('#trailview_checkbox').on('change', () => {
-        sidebar.close();
         updateTrailView();
         if (isTrailViewEnabled) {
             if (isMobileView == true) {
@@ -385,7 +384,17 @@ function onWindowResize() {
         }
     });
 
+    $('#trailview_shortcut').on('click', () => {
+        if ($('#trailview_checkbox').is(':checked')) {
+            $('#trailview_checkbox').prop('checked', false);
+        } else {
+            $('#trailview_checkbox').prop('checked', true);
+        }
+        $('#trailview_checkbox').trigger('change').checkboxradio('refresh');
+    });
+
     $('#trailview_checkbox_label').show(500);
+    $('#trailview_shortcut').show(500);
 }
 
 /**

@@ -200,7 +200,8 @@ module.exports = function(grunt) {
           'static/src/scss/fonts.scss',
           'static/src/scss/jqm-themes/cm-jqm-theme.css',
           'static/src/scss/tooltips.scss',
-          'static/src/scss/mobile.scss'
+          'static/src/scss/mobile.scss',
+          'static/src/scss/trailview.scss'
         ],
         tasks: ['sass:dist']
       },
@@ -224,6 +225,7 @@ module.exports = function(grunt) {
           'static/src/js/nearby.js',
           'static/src/js/trails.js',
           'static/dist/js/handlebars-templates.js',
+          'static/src/js/trailview.js',
           // 'static/src/js/print.js'
         ],
         tasks: ['concat:dist']
@@ -260,6 +262,7 @@ module.exports = function(grunt) {
           'static/src/js/nearby.js',
           'static/src/js/trails.js',
           'static/dist/js/handlebars-templates.js',
+          'static/src/js/trailview.js',
           // 'static/src/js/print.js'
         ],
         tasks: ['terser:dist']
