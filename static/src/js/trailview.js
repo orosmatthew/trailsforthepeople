@@ -542,7 +542,7 @@ function onInitDone(viewer) {
             $('#nav_container').removeClass('nav_container-full').addClass('nav_container-small');
             $(link).addClass('new_nav-small');
         }
-        $(link).attr('src', '/static/images/ui/arrow_new_small_white.png');
+        $(link).attr('src', '/static/images/trailview/nav_arrow.png');
         $(link).data('yaw', hotspots[i].yaw);
         $(link).data('id', hotspots[i]['clickHandlerArgs']['id']);
         $(link).hide(0);
