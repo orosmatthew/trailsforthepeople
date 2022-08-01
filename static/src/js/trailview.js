@@ -225,14 +225,15 @@ function updateContainers() {
                 TRAILVIEWER._panViewer.setHfov(90, 500);
                 $('#sidebar').hide();
                 $('#map_container').hide();
+                $('#viewer_close_btn').css('left', '8px');
             } else {
                 TRAILVIEWER._panViewer.setHfov(120, 500);
                 $('#map_container').show().removeClass().addClass('small-container');
                 $('#viewer_fullscreen_btn').hide();
+                $('#viewer_close_btn').css('left', '58px');
             }
             $('#map_fullscreen_btn').show();
             $('#viewer_container').show().removeClass().addClass('full-container');
-            $('#viewer_close_btn').css('left', '58px');
             populateArrows(currentHotspots);
         } else {
             $('#viewer_fullscreen_btn').show();
@@ -279,6 +280,7 @@ function onWindowResize() {
     onWindowResize();
 
     $('#trailview_checkbox').on('change', () => {
+        sidebar.close();
         updateTrailView();
         if (isTrailViewEnabled) {
             if (isMobileView == true) {
@@ -288,6 +290,14 @@ function onWindowResize() {
             }
         }
         updateContainers();
+        if (isTrailViewEnabled) {
+            MAP.easeTo({
+                center: currentTrailViewMarker.getLngLat(),
+                zoom: 16,
+                bearing: 0,
+                duration: 500,
+            });
+        }
         $('#sidebar').show();
     });
 
@@ -329,6 +339,12 @@ function onWindowResize() {
             }
         }
         updateContainers();
+        MAP.easeTo({
+            center: currentTrailViewMarker.getLngLat(),
+            zoom: 16,
+            bearing: 0,
+            duration: 500,
+        });
     });
 
     $('#viewer_fullscreen_btn').on('click', () => {
@@ -346,6 +362,12 @@ function onWindowResize() {
             }
         }
         updateContainers();
+        MAP.easeTo({
+            center: currentTrailViewMarker.getLngLat(),
+            zoom: 16,
+            bearing: 0,
+            duration: 500,
+        });
     });
 
     // Handle when dots are clicked
