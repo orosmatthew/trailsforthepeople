@@ -276,6 +276,7 @@ function onWindowResize() {
     onWindowResize();
 
     $('#trailview_checkbox').on('change', () => {
+        sidebar.close();
         updateTrailView();
         if (isTrailViewEnabled) {
             if (isMobileView == true) {
@@ -384,7 +385,7 @@ function onWindowResize() {
         }
     });
 
-    $('#trailview_checkbox_container').show(500);
+    $('#trailview_checkbox_label').show(500);
 }
 
 /**

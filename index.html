@@ -281,6 +281,8 @@
                 <label><input type="radio" name="basemap" value="photo" />Satellite</label>
                 <label><input type="radio" name="basemap" value="terrain" />3D Terrain</label>
             </fieldset>
+
+            <label id="trailview_checkbox_label"><input id="trailview_checkbox" type="checkbox" name="trailview" />TrailView</label>
         </div>
         <!-- /#pane-layers -->
 
@@ -400,12 +402,6 @@
                 <span class="title-text">Settings</span>
                 <span class="sidebar-close"><i class="cm-icon cm-icon-caret-left"></i></span>
             </h1>
-
-            <label for="map_type">Map type</label>
-            <fieldset id="map_type" data-role="controlgroup">
-                <label><input type="radio" name="basemap" value="map" checked="true" />Default</label>
-                <label><input type="radio" name="basemap" value="photo" />Satellite</label>
-            </fieldset>
 
             <label for="coordinate_format">Coordinate format</label>
             <fieldset id="coordinate_format" data-role="controlgroup">
@@ -652,14 +648,6 @@
     <div id="nav_container" class="nav_container-small">
     </div>
 </div>
-
-<div id="trailview_checkbox_container" style="position: absolute; top: 8px; left: 60px; display: none;">
-    <label>
-        <input id="trailview_checkbox" type="checkbox">
-        <span class="label">TrailView</span>
-    </label>
-</div>
-
 
 <!-- Audio -->
 <audio autoboffer id="alert_beep">

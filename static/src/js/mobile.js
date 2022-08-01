@@ -244,6 +244,7 @@ $(document).ready(function () {
     $('input[type="radio"][name="basemap"]').change(function () {
         var which = $(this).val();
         changeBasemap(which);
+        sidebar.close();
     });
 });
 
