@@ -81,6 +81,7 @@ var STYLE_NAMES = {
 
 var IS_TRAILVIEW_ENABLED = true;   // Also enable/disable in Gruntfile.js
 
+var TRAILVIEW_URL = "https://trailview.cmparks.net"     // Do not include trailing slash
 ;
 /**
  * common.js
@@ -4469,7 +4470,9 @@ function updateContainers() {
             } else {
                 $('#viewer_container').show().removeClass().addClass('small-container');
                 populateArrows(currentHotspots);
+                $('#map_fullscreen_btn').hide();
             }
+            $('#viewer_fullscreen_btn').show();
         } else if (fullscreenElement == 'viewer') {
             if (isMobileView) {
                 TRAILVIEWER._panViewer.setHfov(90, 500);
@@ -4478,10 +4481,14 @@ function updateContainers() {
             } else {
                 TRAILVIEWER._panViewer.setHfov(120, 500);
                 $('#map_container').show().removeClass().addClass('small-container');
+                $('#viewer_fullscreen_btn').hide();
             }
+            $('#map_fullscreen_btn').show();
             $('#viewer_container').show().removeClass().addClass('full-container');
             populateArrows(currentHotspots);
         } else {
+            $('#viewer_fullscreen_btn').show();
+            $('#map_fullscreen_btn').show();
             TRAILVIEWER._panViewer.setHfov(120, 500);
             $('#sidebar').show();
             $('#map_container').show().removeClass().addClass('bottom-container');
@@ -4687,7 +4694,7 @@ function onWindowResize() {
  * Fetches base data for points
  */
  function fetchTrailViewData() {
-    $.getJSON("https://trailview.cmparks.net/api/images.php", {
+    $.getJSON(TRAILVIEW_URL + '/api/images.php', {
         'type': 'standard'
         },
         function (data, textStatus, jqXHR) {

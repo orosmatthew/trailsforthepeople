@@ -246,6 +246,8 @@ function updateContainers() {
             $('#viewer_container').show().removeClass().addClass('full-container');
             populateArrows(currentHotspots);
         } else {
+            $('#viewer_fullscreen_btn').show();
+            $('#map_fullscreen_btn').show();
             TRAILVIEWER._panViewer.setHfov(120, 500);
             $('#sidebar').show();
             $('#map_container').show().removeClass().addClass('bottom-container');

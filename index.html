@@ -77,8 +77,8 @@
         <ul role="tablist">
             <li><a href="#pane-welcome" role="tab" title="Welcome"><i class="cm-icon cm-icon-cm-logo"></i></a></li>
             <li><a href="#pane-browse" role="tab" title="Find"><i class="cm-icon cm-icon-search"></i></a></li>
-            <li><a href="#pane-nearby" role="tab" title="Nearby"><i class="cm-icon cm-icon-street-view"></i></a></li>
-            <li><a href="#pane-directions" role="tab" title="Directions"><i class="cm-icon cm-icon-location-arrow"></i></a></li>
+            <li><a href="#pane-nearby" role="tab" title="Nearby"><i class="cm-icon cm-icon-location-arrow"></i></a></li>
+            <li><a href="#pane-directions" role="tab" title="Directions"><i class="cm-icon cm-icon-directions"></i></a></li>
             <li><a href="#pane-share" role="tab" title="Share"><i class="cm-icon cm-icon-share-alt"></i></a></li>
         </ul>
 
@@ -623,17 +623,17 @@
 
 <!-- Map -->
 <div id="map_container" class="full-container">
-    <div id="map_canvas" class="sidebar-map"></div>
-    <button id="map_fullscreen_btn" style="position: absolute; top: 6px; right: 8px; display: none;" data-role="none" class="trailview-ui-button"><img src="static/images/ui/expand.png" draggable="false"></button>
-    <button id="3d_btn" style="position: absolute; bottom: 190px; right: 8px; padding: 3px; display: none;" data-role="none" class="trailview-ui-button"><img src="static/images/ui/3d.png" draggable="false"></button>
+    <div id="map_canvas" class="sidebar-map"></div>`
+    <button id="map_fullscreen_btn" style="position: absolute; top: 6px; right: 8px; display: none; font-size: 16pt; font-weight: lighter;" data-role="none" class="trailview-ui-button"><i class="cm-icon cm-icon-expand"></i></button>`
+    <button id="3d_btn" style="position: absolute; bottom: 190px; right: 8px; padding: 3px; display: none;" data-role="none" class="trailview-ui-button"><img src="static/images/ui/3d.png" draggable="false"></button>`
 </div>
 
 <div id="viewer_container" class="small-container" hidden>
     <div id="panorama" style="width: 100%; height: 100%;"></div>
-    <button id="viewer_fullscreen_btn" style="position: absolute; top: 6px; right: 8px;" data-role="none" class="trailview-ui-button"><img src="static/images/ui/expand.png" draggable="false"></button>
-    <button id="viewer_orient_btn" style="position: absolute; bottom: 88px; right: 8px; display: none;" data-role="none" class="trailview-ui-button"><img src="static/images/ui/orientation.png" draggable="false"></button>
-    <button id="viewer_zoom_in_btn" style="position: absolute; bottom: 48px; right: 8px;" data-role="none" class="trailview-ui-button"><img src="static/images/ui/zoom-in.png" draggable="false"></button>
-    <button id="viewer_zoom_out_btn" style="position: absolute; bottom: 8px; right: 8px;" data-role="none" class="trailview-ui-button"><img src="static/images/ui/zoom-out.png" draggable="false"></button>
+    <button id="viewer_fullscreen_btn" style="position: absolute; top: 6px; right: 8px; font-size: 16pt; font-weight: lighter;" data-role="none" class="trailview-ui-button"><i class="cm-icon cm-icon-expand"></i></button>
+    <button id="viewer_orient_btn" style="position: absolute; bottom: 88px; right: 8px; font-size: 16pt; display: none;" data-role="none" class="trailview-ui-button"><i class="cm-icon cm-icon-orientation"></i></button>
+    <button id="viewer_zoom_in_btn" style="position: absolute; bottom: 48px; right: 8px;" data-role="none" class="trailview-ui-button"><i class="cm-icon cm-icon-zoomin"></i></button>
+    <button id="viewer_zoom_out_btn" style="position: absolute; bottom: 8px; right: 8px;" data-role="none" class="trailview-ui-button"><i class="cm-icon cm-icon-zoomout"></i></button>
     <div id="nav_container" class="nav_container-small">
     </div>
 </div>
