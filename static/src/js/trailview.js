@@ -21,6 +21,8 @@ var updateMarkerRotationInterval = null;
 var updateNavArrowsInterval = null;
 // The current TrailViewer hotspots (used for updating nav arrows)
 var currentHotspots;
+// Starting image ID (used for mainly for window params)
+var initImageID;
 
 /**
  * Creates TrailView map layer for dots
@@ -151,6 +153,12 @@ function updateTrailView() {
         $('.new_nav').remove();
         destroyTrailViewer();
         isTrailViewEnabled = false;
+        // Remove image ID from URL
+        invalidateWindowURL();
+        params = {
+            view: null
+        }
+        setWindowURLQueryStringParameters(params, false, false);
     }
 }
 
@@ -164,10 +172,12 @@ function createTrailViewer() {
             'onGeoChangeFunc': onGeoChange,
             'onInitDoneFunc': onInitDone,
             'onArrowsAddedFunc': populateArrows,
+            'onSceneChangeFunc': updateWindowURLTrailView,
             'navArrowMinAngle': -25,
             'navArrowMaxAngle': -20,
         }, 
-        null, trailViewData, MAP.getCenter().lat, MAP.getCenter().lng);
+        initImageID, trailViewData, MAP.getCenter().lat, MAP.getCenter().lng);
+        initImageID = null;
         $('#viewer_container').stop().fadeIn(500);
     }
 }
@@ -424,6 +434,7 @@ function onWindowResize() {
 
     $('#trailview_checkbox_label').show(500);
     $('#trailview_shortcut').show(500);
+    updateTrailView();
 }
 
 /**
@@ -549,4 +560,17 @@ function onInitDone(viewer) {
             duration: 500,
         });
     }
+}
+
+/**
+ * Update the window URL with image id.
+ * Called when scene changes
+ * @param {Object} img - image scene object
+ */
+function updateWindowURLTrailView(img) {
+    invalidateWindowURL();
+    params = {
+        view: img.id
+    }
+    setWindowURLQueryStringParameters(params, false, false);
 }

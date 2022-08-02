@@ -974,6 +974,7 @@ $(document).ready(function () {
     populateSidebarPanes();
     if (IS_TRAILVIEW_ENABLED) {
         fetchTrailViewData();
+        loadTrailViewStartingState();
     }
 });
 
@@ -982,7 +983,30 @@ $(document).ready(function () {
  */
 window.onpopstate = function() {
     loadMapAndStartingState();
+    if (IS_TRAILVIEW_ENABLED) {
+        loadTrailViewStartingState();
+    }
 };
+
+/**
+ * Load TrailView state from window params
+ */
+function loadTrailViewStartingState() {
+    let urlParams = new URLSearchParams(location.search);
+    let imageID = urlParams.get('view');
+    if (!imageID || imageID == 'null') {
+        $('#trailview_checkbox').prop('checked', false).trigger('change').checkboxradio('refresh');
+        updateTrailView();
+        return;
+    }
+    if (!TRAILVIEWER) {
+        initImageID = imageID;
+        $('#trailview_checkbox').prop('checked', true).trigger('change').checkboxradio('refresh');
+    } else {
+        TRAILVIEWER.goToImageID(imageID);
+    }
+    updateTrailView();
+}
 
 /**
  * Load the map and process query string parameters to initiate state.
@@ -1007,6 +1031,9 @@ function loadMapAndStartingState() {
     };
 
     // Initialize the map
+    if (MAP) {
+        MAP.remove();
+    }
     initMap(mapOptions);
 
     // URL params query string: "type" and "gid"
@@ -4326,6 +4353,8 @@ var updateMarkerRotationInterval = null;
 var updateNavArrowsInterval = null;
 // The current TrailViewer hotspots (used for updating nav arrows)
 var currentHotspots;
+// Starting image ID (used for mainly for window params)
+var initImageID;
 
 /**
  * Creates TrailView map layer for dots
@@ -4456,6 +4485,12 @@ function updateTrailView() {
         $('.new_nav').remove();
         destroyTrailViewer();
         isTrailViewEnabled = false;
+        // Remove image ID from URL
+        invalidateWindowURL();
+        params = {
+            view: null
+        }
+        setWindowURLQueryStringParameters(params, false, false);
     }
 }
 
@@ -4469,10 +4504,12 @@ function createTrailViewer() {
             'onGeoChangeFunc': onGeoChange,
             'onInitDoneFunc': onInitDone,
             'onArrowsAddedFunc': populateArrows,
+            'onSceneChangeFunc': updateWindowURLTrailView,
             'navArrowMinAngle': -25,
             'navArrowMaxAngle': -20,
         }, 
-        null, trailViewData, MAP.getCenter().lat, MAP.getCenter().lng);
+        initImageID, trailViewData, MAP.getCenter().lat, MAP.getCenter().lng);
+        initImageID = null;
         $('#viewer_container').stop().fadeIn(500);
     }
 }
@@ -4729,6 +4766,7 @@ function onWindowResize() {
 
     $('#trailview_checkbox_label').show(500);
     $('#trailview_shortcut').show(500);
+    updateTrailView();
 }
 
 /**
@@ -4854,4 +4892,17 @@ function onInitDone(viewer) {
             duration: 500,
         });
     }
+}
+
+/**
+ * Update the window URL with image id.
+ * Called when scene changes
+ * @param {Object} img - image scene object
+ */
+function updateWindowURLTrailView(img) {
+    invalidateWindowURL();
+    params = {
+        view: img.id
+    }
+    setWindowURLQueryStringParameters(params, false, false);
 }

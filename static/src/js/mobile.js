@@ -81,6 +81,7 @@ $(document).ready(function () {
     populateSidebarPanes();
     if (IS_TRAILVIEW_ENABLED) {
         fetchTrailViewData();
+        loadTrailViewStartingState();
     }
 });
 
@@ -89,7 +90,30 @@ $(document).ready(function () {
  */
 window.onpopstate = function() {
     loadMapAndStartingState();
+    if (IS_TRAILVIEW_ENABLED) {
+        loadTrailViewStartingState();
+    }
 };
+
+/**
+ * Load TrailView state from window params
+ */
+function loadTrailViewStartingState() {
+    let urlParams = new URLSearchParams(location.search);
+    let imageID = urlParams.get('view');
+    if (!imageID || imageID == 'null') {
+        $('#trailview_checkbox').prop('checked', false).trigger('change').checkboxradio('refresh');
+        updateTrailView();
+        return;
+    }
+    if (!TRAILVIEWER) {
+        initImageID = imageID;
+        $('#trailview_checkbox').prop('checked', true).trigger('change').checkboxradio('refresh');
+    } else {
+        TRAILVIEWER.goToImageID(imageID);
+    }
+    updateTrailView();
+}
 
 /**
  * Load the map and process query string parameters to initiate state.
@@ -114,6 +138,9 @@ function loadMapAndStartingState() {
     };
 
     // Initialize the map
+    if (MAP) {
+        MAP.remove();
+    }
     initMap(mapOptions);
 
     // URL params query string: "type" and "gid"
