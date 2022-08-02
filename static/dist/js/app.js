@@ -126,12 +126,15 @@ function initMap(mapOptions) {
     var base = mapOptions.base || 'map';
     var basemap_style; // Mapbox base style layer
 
+    currentMapLayer = base;
+
     switch (base) {
         case 'photo':
             basemap_style = STYLE_LAYER_CM_SAT;
             break;
         case 'terrain':
             basemap_style = STYLE_LAYER_CM_SAT;
+            break;
         case 'map':
         default:
             basemap_style = STYLE_LAYER_CM_MAP;
@@ -186,7 +189,15 @@ function initMap(mapOptions) {
     }
 
     if (base == 'terrain') {
-        changeBasemap('terrain');
+        MAP.once('style.load', () => {
+            MAP.addSource('mapbox-dem', {
+                'type': 'raster-dem',
+                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1?optimize=true',
+                'tileSize': 256,
+                'maxzoom': 14
+            });
+            MAP.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.25 });
+        });
     }
 
     // Fire mapInitialized event
