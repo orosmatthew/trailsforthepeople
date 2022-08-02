@@ -503,7 +503,7 @@ function renderDirectionsStructure(directions) {
 function updateWindowURLWithDirections() {
     var params = {};
 
-    params.base = (getBasemap() == 'photo') ? 'photo' : 'map';
+    params.base = currentMapLayer;
 
     params.action = 'directions';
 

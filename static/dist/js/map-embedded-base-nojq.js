@@ -2602,6 +2602,8 @@ var SETTINGS = [];
 // We'll get this from localStorage on document ready
 SETTINGS.coordinate_format = 'dms';
 
+var currentMapLayer = 'map';
+
 /**
  * Initialize the map
  *
@@ -2624,6 +2626,8 @@ function initMap(mapOptions) {
         case 'photo':
             basemap_style = STYLE_LAYER_CM_SAT;
             break;
+        case 'terrain':
+            basemap_style = STYLE_LAYER_CM_SAT;
         case 'map':
         default:
             basemap_style = STYLE_LAYER_CM_MAP;
@@ -2675,6 +2679,10 @@ function initMap(mapOptions) {
         }
     } else {
         MAP.fitBounds(MAX_BOUNDS);
+    }
+
+    if (base == 'terrain') {
+        changeBasemap('terrain');
     }
 
     // Fire mapInitialized event
@@ -2739,6 +2747,7 @@ function showInfoPopup(message, type) {
  * @param layer_key: Must refer to the key of an available layer (in STYLE_LAYERS constant).
  */
 function changeBasemap(layer_key) {
+    currentMapLayer = layer_key;
     switch (layer_key) {
         case 'map':
             active_layer = STYLE_LAYERS['map'];

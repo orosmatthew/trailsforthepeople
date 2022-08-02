@@ -270,6 +270,7 @@ $(document).ready(function () {
     $('input[type="radio"][name="basemap"]').change(function () {
         var which = $(this).val();
         changeBasemap(which);
+        updateWindowURLLayer();
         sidebar.close();
     });
 });
@@ -915,14 +916,8 @@ function updateWindowURLZoom() {
  * Update the window URL with baselayer param.
  */
 function updateWindowURLLayer() {
-    // Default is vector/map layer
-    var layer = 'map';
-    // Else, satellite ("photo")
-    if (getBasemap() == 'photo') {
-        layer = 'photo';
-    }
     invalidateWindowURL();
-    setWindowURLQueryStringParameters({base: layer}, false);
+    setWindowURLQueryStringParameters({base: currentMapLayer}, false, false);
 }
 
 /**
