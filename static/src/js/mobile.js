@@ -81,7 +81,6 @@ $(document).ready(function () {
     populateSidebarPanes();
     if (IS_TRAILVIEW_ENABLED) {
         fetchTrailViewData();
-        loadTrailViewStartingState();
     }
 });
 

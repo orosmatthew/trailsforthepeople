@@ -974,7 +974,6 @@ $(document).ready(function () {
     populateSidebarPanes();
     if (IS_TRAILVIEW_ENABLED) {
         fetchTrailViewData();
-        loadTrailViewStartingState();
     }
 });
 
@@ -4465,8 +4464,6 @@ function updateTrailView() {
     if ($('#trailview_checkbox').is(':checked')) {
         if (!MAP.getLayer('dots')) {
             createTrailViewMapLayer(trailViewData);
-        } else {
-            MAP.addLayer('dots');
         }
         if (!TRAILVIEWER) {
             createTrailViewer();
@@ -4766,7 +4763,7 @@ function onWindowResize() {
 
     $('#trailview_checkbox_label').show(500);
     $('#trailview_shortcut').show(500);
-    updateTrailView();
+    loadTrailViewStartingState();
 }
 
 /**
