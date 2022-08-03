@@ -1155,19 +1155,13 @@ function loadMapAndStartingState() {
 
     // Set the appropriate basemap radio button in Settings
     var base = urlParams.get('base') || 'map';
-    var satelliteButton = $('input[name="basemap"][value="photo"]');
     var defaultMapButton = $('input[name="basemap"][value="map"]');
-    switch (base) {
-        case 'photo':
-            satelliteButton.prop('checked', true).checkboxradio('refresh');
-            defaultMapButton.prop('checked', false).checkboxradio('refresh');
-            break;
-        case 'map':
-        default:
-            satelliteButton.prop('checked', false).checkboxradio('refresh');
-            defaultMapButton.prop('checked', true).checkboxradio('refresh');
-            break;
-    }
+    var satelliteButton = $('input[name="basemap"][value="photo"]');
+    var terrainButton = $('input[name="basemap"][value="terrain"]');
+
+    defaultMapButton.prop('checked', base == 'map').checkboxradio('refresh');
+    satelliteButton.prop('checked', base == 'photo').checkboxradio('refresh');
+    terrainButton.prop('checked', base == 'terrain').checkboxradio('refresh');
 
     // Map is initialized and query strings handled.
     // Fire mapReady event.
