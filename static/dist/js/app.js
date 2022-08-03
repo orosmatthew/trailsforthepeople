@@ -1014,7 +1014,6 @@ function loadTrailViewStartingState() {
     let urlParams = new URLSearchParams(location.search);
     let imageID = urlParams.get('view');
     if (!imageID || imageID == 'null') {
-        $('#trailview_checkbox').prop('checked', false).trigger('change').checkboxradio('refresh');
         updateTrailView();
         return;
     }
@@ -4489,14 +4488,16 @@ function updateTrailView() {
         clearInterval(updateMarkerRotationInterval);
         clearInterval(updateNavArrowsInterval);
         $('.new_nav').remove();
+        if (TRAILVIEWER) {
+            // Remove image ID from URL
+            invalidateWindowURL();
+            params = {
+                view: null
+            }
+            setWindowURLQueryStringParameters(params, false, false);
+        }
         destroyTrailViewer();
         isTrailViewEnabled = false;
-        // Remove image ID from URL
-        invalidateWindowURL();
-        params = {
-            view: null
-        }
-        setWindowURLQueryStringParameters(params, false, false);
     }
 }
 

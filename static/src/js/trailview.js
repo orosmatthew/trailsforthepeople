@@ -149,14 +149,16 @@ function updateTrailView() {
         clearInterval(updateMarkerRotationInterval);
         clearInterval(updateNavArrowsInterval);
         $('.new_nav').remove();
+        if (TRAILVIEWER) {
+            // Remove image ID from URL
+            invalidateWindowURL();
+            params = {
+                view: null
+            }
+            setWindowURLQueryStringParameters(params, false, false);
+        }
         destroyTrailViewer();
         isTrailViewEnabled = false;
-        // Remove image ID from URL
-        invalidateWindowURL();
-        params = {
-            view: null
-        }
-        setWindowURLQueryStringParameters(params, false, false);
     }
 }
 

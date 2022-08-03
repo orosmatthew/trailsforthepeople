@@ -101,7 +101,6 @@ function loadTrailViewStartingState() {
     let urlParams = new URLSearchParams(location.search);
     let imageID = urlParams.get('view');
     if (!imageID || imageID == 'null') {
-        $('#trailview_checkbox').prop('checked', false).trigger('change').checkboxradio('refresh');
         updateTrailView();
         return;
     }
