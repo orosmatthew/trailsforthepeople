@@ -4771,7 +4771,7 @@ function onWindowResize() {
         $('#trailview_checkbox').prop('checked', false).trigger('change').checkboxradio('refresh');
     });
 
-    $('#trailview_checkbox_label').show(500);
+    $('#trailview_checkbox_container').show(500);
     $('#trailview_shortcut').show(500);
     loadTrailViewStartingState();
 }
