@@ -4476,6 +4476,7 @@ function updateTrailView() {
         if (!TRAILVIEWER) {
             createTrailViewer();
         }
+        $('#trailview_random_btn_container').show(500);
         isTrailViewEnabled = true;
     } else {
         if (MAP.getLayer('dots')) {
@@ -4497,6 +4498,7 @@ function updateTrailView() {
             setWindowURLQueryStringParameters(params, false, false);
         }
         destroyTrailViewer();
+        $('#trailview_random_btn_container').hide(500);
         isTrailViewEnabled = false;
     }
 }
@@ -4769,6 +4771,14 @@ function onWindowResize() {
 
     $('#viewer_close_btn').on('click', () => {
         $('#trailview_checkbox').prop('checked', false).trigger('change').checkboxradio('refresh');
+    });
+
+    $('#trailview_random_btn').on('click', () => {
+        if (TRAILVIEWER) {
+            let randomID = trailViewData[Math.floor(Math.random()*trailViewData.length)].id;
+            TRAILVIEWER.goToImageID(randomID);
+            sidebar.close();
+        }
     });
 
     $('#trailview_checkbox_container').show(500);
