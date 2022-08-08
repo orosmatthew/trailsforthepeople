@@ -4518,6 +4518,10 @@ function createTrailViewer() {
             'navArrowMaxAngle': -20,
         }, 
         initImageID, trailViewData, MAP.getCenter().lat, MAP.getCenter().lng);
+    
+        TRAILVIEWER.optimalDist = 4;
+        TRAILVIEWER.neighborDistCutoff = 10;
+
         initImageID = null;
         $('#viewer_container').stop().fadeIn(500);
     }
