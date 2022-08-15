@@ -494,6 +494,16 @@ function setWindowURLQueryStringParameters(params, reset, pushState) {
     saveWindowURL(urlParams, pushState);
 }
 
+/**
+ * Delete a search param from the window
+ * @param {String} param - param to delete 
+ */
+ function deleteWindowURLQueryStringParameter(param, pushState) {
+    let urlParams = (new URL(document.location)).searchParams;
+    urlParams.delete(param);
+    saveWindowURL(urlParams, pushState);
+}
+
 ;
 /**
  * data.js
@@ -4492,10 +4502,7 @@ function updateTrailView() {
         if (TRAILVIEWER) {
             // Remove image ID from URL
             invalidateWindowURL();
-            params = {
-                view: null
-            }
-            setWindowURLQueryStringParameters(params, false, false);
+            deleteWindowURLQueryStringParameter('view', false);
         }
         destroyTrailViewer();
         $('#trailview_random_btn_container').hide(500);

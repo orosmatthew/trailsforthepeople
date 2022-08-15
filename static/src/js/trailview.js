@@ -153,10 +153,7 @@ function updateTrailView() {
         if (TRAILVIEWER) {
             // Remove image ID from URL
             invalidateWindowURL();
-            params = {
-                view: null
-            }
-            setWindowURLQueryStringParameters(params, false, false);
+            deleteWindowURLQueryStringParameter('view', false);
         }
         destroyTrailViewer();
         $('#trailview_random_btn_container').hide(500);
