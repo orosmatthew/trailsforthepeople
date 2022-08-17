@@ -15,12 +15,8 @@ var isTrailViewEnabled = false;
 // Whether the map or viewer is fullscreen
 //     Values can be 'map', 'viewer', or null
 var fullscreenElement = 'map';
-// Intervals for updating current TrailView marker rotation
-//     and nav arrow rotation
+// Interval for updating current TrailView marker rotation
 var updateMarkerRotationInterval = null;
-var updateNavArrowsInterval = null;
-// The current TrailViewer hotspots (used for updating nav arrows)
-var currentHotspots;
 // Starting image ID (used for mainly for window params)
 var initImageID;
 
@@ -148,8 +144,6 @@ function updateTrailView() {
             currentTrailViewMarker = null;
         }
         clearInterval(updateMarkerRotationInterval);
-        clearInterval(updateNavArrowsInterval);
-        $('.new_nav').remove();
         if (TRAILVIEWER) {
             // Remove image ID from URL
             invalidateWindowURL();
@@ -170,7 +164,6 @@ function createTrailViewer() {
             'useURLHashing': false, 
             'onGeoChangeFunc': onGeoChange,
             'onInitDoneFunc': onInitDone,
-            'onArrowsAddedFunc': populateArrows,
             'onSceneChangeFunc': updateWindowURLTrailView,
             'navArrowMinAngle': -25,
             'navArrowMaxAngle': -20,
@@ -229,10 +222,10 @@ function updateContainers() {
             } else {
                 $('#viewer_close_btn').css('left', '8px');
                 $('#viewer_container').show().removeClass().addClass('small-container');
-                populateArrows(currentHotspots);
                 $('#map_fullscreen_btn').hide();
             }
             $('#viewer_fullscreen_btn').show();
+            TRAILVIEWER.setNavSize(false);
         } else if (fullscreenElement == 'viewer') {
             if (isMobileView) {
                 TRAILVIEWER._panViewer.setHfov(90, 500);
@@ -247,7 +240,7 @@ function updateContainers() {
             }
             $('#map_fullscreen_btn').show();
             $('#viewer_container').show().removeClass().addClass('full-container');
-            populateArrows(currentHotspots);
+            TRAILVIEWER.setNavSize(true);
         } else {
             $('#viewer_fullscreen_btn').show();
             $('#map_fullscreen_btn').show();
@@ -256,7 +249,7 @@ function updateContainers() {
             $('#map_container').show().removeClass().addClass('bottom-container');
             $('#viewer_container').show().removeClass().addClass('top-container');
             $('#viewer_close_btn').css('left', '58px');
-            populateArrows(currentHotspots);
+            TRAILVIEWER.setNavSize(false);
         }
     } else {
         $('#map_fullscreen_btn').hide();
@@ -481,81 +474,9 @@ function onWindowResize() {
 function onInitDone(viewer) {
     viewer._panViewer.resize();
     updateMarkerRotationInterval = setInterval(updateMarkerRotation, 16);
-    updateNavArrowsInterval = setInterval(updateNavArrows, 16);
     if (viewer._panViewer.isOrientationSupported()) {
         $('#viewer_orient_btn').show(500);
     }
-}
-
-/**
- * Updates navigation arrows transform
- * Called by setInterval()
- */
- function updateNavArrows() {
-    if (TRAILVIEWER && TRAILVIEWER._panViewer) {
-        // Arrow rotation
-        $('.new_nav').each(function (index, element) {
-            let yaw = customMod(((360 - angle180to360(TRAILVIEWER._panViewer.getYaw())) + $(element).data('yaw')), 360);
-            if (fullscreenElement == 'viewer') {
-                $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-100px)');
-            } else {
-                $(element).css('transform', 'rotateZ(' + yaw + 'deg) translateY(-50px)');
-            }
-        });
-        // Container rotation
-        let rot = (TRAILVIEWER._panViewer.getPitch() + 90) / 2.5;
-        if (rot > 80) {
-            rot = 80
-        } else if (rot < 0) {
-            rot = 0;
-        }
-        $('#nav_container').css('transform', 'perspective(300px) rotateX(' + rot + 'deg)');
-    }
-}
-
-/**
- * Called when navigation arrow is clicked
- * @param {String} id - Image ID to navigate to
- */
- function onNavArrowClicked(id) {
-    TRAILVIEWER.goToImageID(id);
-}
-
-/**
- * Populates navigation arrows
- * @param {Object} hotspots - JSON object from pannellum config
- */
- function populateArrows(hotspots) {
-    currentHotspots = hotspots;
-    $('.new_nav').remove();
-    if (!hotspots) {
-        return;
-    }
-    for (let i = 0; i < hotspots.length; i++) {
-        let link = document.createElement('img');
-        $(link).addClass('new_nav');
-        if (fullscreenElement == 'viewer') {
-            $('#nav_container').removeClass('nav_container-small').addClass('nav_container-full');
-            $(link).addClass('new_nav-full');
-        } else {
-            $('#nav_container').removeClass('nav_container-full').addClass('nav_container-small');
-            $(link).addClass('new_nav-small');
-        }
-        $(link).attr('src', '/static/images/trailview/nav_arrow.png');
-        $(link).data('yaw', hotspots[i].yaw);
-        $(link).data('id', hotspots[i]['clickHandlerArgs']['id']);
-        $(link).hide(0);
-        $(link).on('click', function (e) { 
-            e.preventDefault();
-            onNavArrowClicked($(this).data('id'));
-            $('.new_nav').fadeOut(10);
-        });
-        $(link).attr('draggable', false);
-        //$(link).css('transform', 'rotateZ(' + hotspots[i].yaw + 'deg) translateY(-100px)');
-        $('#nav_container').append($(link));
-    }
-    updateNavArrows();
-    $('.new_nav').fadeIn(200);
 }
 
 /**
@@ -576,12 +497,12 @@ function onInitDone(viewer) {
 /**
  * Update the window URL with image id.
  * Called when scene changes
- * @param {Object} img - image scene object
+ * @param {String} id - image id
  */
-function updateWindowURLTrailView(img) {
+function updateWindowURLTrailView(id) {
     invalidateWindowURL();
     params = {
-        view: img.id
+        view: id
     }
     setWindowURLQueryStringParameters(params, false, false);
 }
