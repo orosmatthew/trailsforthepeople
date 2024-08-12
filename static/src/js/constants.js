@@ -11,13 +11,13 @@
 ///// for Admin and Contributors maps, see admin.js and contributors.js
 
 // How we get to our app's base files and to the API.
-// These change to remote URLs web-embedded scenarios.
+// These change to remote URLs in main-site embedded maps.
 // @TODO: Put these into a local config so we can handle non-root basedirs.
 var WEBAPP_BASEPATH = '/';
 var API_BASEPATH = '/';
 var MAP = null;
 
-var API_NEW_HOST = 'maps-api-dev2.clevelandmetroparks.com';
+var API_NEW_HOST = 'maps-api.clevelandmetroparks.com';
 var API_NEW_PROTOCOL = 'https:';
 var API_NEW_BASEPATH = '/api/v1/';
 var API_NEW_BASE_URL = API_NEW_PROTOCOL + '//' + API_NEW_HOST + API_NEW_BASEPATH;
@@ -69,10 +69,13 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY2xldmVsYW5kLW1ldHJvcGFya3MiLCJhIjoiWHRKaDhuR
 var STYLE_LAYER_CM_MAP = 'mapbox://styles/cleveland-metroparks/cisvvmgwe00112xlk4jnmrehn?optimize=true'; // Vector
 var STYLE_LAYER_CM_SAT = 'mapbox://styles/cleveland-metroparks/cjcutetjg07892ro6wunp2da9?optimize=true'; // Satellite
 
+
 var STYLE_LAYERS = {
     'map' : STYLE_LAYER_CM_MAP,
     'photo' : STYLE_LAYER_CM_SAT
 };
+
+var DEFAULT_LAYER = 'map';
 
 var STYLE_NAMES = {
     'CM Light' : 'map',

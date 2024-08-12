@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import axios from "axios";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { Table, Anchor, Box, Pagination } from '@mantine/core';
 import { default as dayjs } from 'dayjs';
+
+import { mapsApiClient } from "../components/mapsApi";
 
 type AuditLog = {
   id: number,
@@ -13,23 +14,25 @@ type AuditLog = {
   message: string
 };
 
-const apiClient = axios.create({
-  baseURL: "https://maps-api-dev2.clevelandmetroparks.com/api/v1",
-  headers: {
-    "Content-type": "application/json",
-  },
-});
-
 //
 export function AuditLogView() {
   //
   const getAuditLog = async (id: string) => {
-    const response = await apiClient.get<any>("/audit_logs/" + id);
+    const response = await mapsApiClient.get<any>(process.env.REACT_APP_MAPS_API_BASE_PATH + "/audit_logs/" + id);
     return response.data.data;
   }
 
   let params = useParams();
-  let logId = params.logId ? params.logId.toString() : '';
+
+  let logId = '';
+  if (params.logId) {
+    if (!isNaN(parseFloat(params.logId))) { // Ensure marker ID is an int
+      logId = params.logId.toString();
+    } else {
+      throw new Error("Invalid Log ID");
+    }
+  }
+  // let logId = params.logId ? params.logId.toString() : '';
 
   const { isLoading, isSuccess, isError, data, error, refetch } = useQuery<AuditLog, Error>(['audit_log', params.logId], () => getAuditLog(logId));
 
@@ -66,7 +69,7 @@ export function AuditLogsList() {
     if (skip > 0) {
       requestPath += "&skip=" + skip;
     }
-    const response = await apiClient.get<any>(requestPath);
+    const response = await mapsApiClient.get<any>(process.env.REACT_APP_MAPS_API_BASE_PATH + requestPath);
     return response.data.data;
   }
 
@@ -117,7 +120,7 @@ export function AuditLogsList() {
       </Table>
 
       <Box sx={{marginTop: '1em' }}>
-        <Pagination page={page} onChange={setPage} total={200} />
+        <Pagination value={page} onChange={setPage} total={200} />
       </Box>
 
     </div>

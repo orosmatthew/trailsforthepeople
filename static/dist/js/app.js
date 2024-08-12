@@ -11,13 +11,13 @@
 ///// for Admin and Contributors maps, see admin.js and contributors.js
 
 // How we get to our app's base files and to the API.
-// These change to remote URLs web-embedded scenarios.
+// These change to remote URLs in main-site embedded maps.
 // @TODO: Put these into a local config so we can handle non-root basedirs.
 var WEBAPP_BASEPATH = '/';
 var API_BASEPATH = '/';
 var MAP = null;
 
-var API_NEW_HOST = 'maps-api-dev2.clevelandmetroparks.com';
+var API_NEW_HOST = 'maps-api.clevelandmetroparks.com';
 var API_NEW_PROTOCOL = 'https:';
 var API_NEW_BASEPATH = '/api/v1/';
 var API_NEW_BASE_URL = API_NEW_PROTOCOL + '//' + API_NEW_HOST + API_NEW_BASEPATH;
@@ -69,10 +69,13 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY2xldmVsYW5kLW1ldHJvcGFya3MiLCJhIjoiWHRKaDhuR
 var STYLE_LAYER_CM_MAP = 'mapbox://styles/cleveland-metroparks/cisvvmgwe00112xlk4jnmrehn?optimize=true'; // Vector
 var STYLE_LAYER_CM_SAT = 'mapbox://styles/cleveland-metroparks/cjcutetjg07892ro6wunp2da9?optimize=true'; // Satellite
 
+
 var STYLE_LAYERS = {
     'map' : STYLE_LAYER_CM_MAP,
     'photo' : STYLE_LAYER_CM_SAT
 };
+
+var DEFAULT_LAYER = 'map';
 
 var STYLE_NAMES = {
     'CM Light' : 'map',
@@ -123,7 +126,7 @@ var currentMapLayer = 'map';
  */
 function initMap(mapOptions) {
     // Base map type; URL param or map (vs photo/satellite) default
-    var base = mapOptions.base || 'map';
+    var base = mapOptions.base || DEFAULT_LAYER;
     var basemap_style; // Mapbox base style layer
 
     currentMapLayer = base;
@@ -474,7 +477,7 @@ function saveWindowURL(urlParams, pushState) {
 /**
  * Set a bunch of query string parameters in window location.
  *
- * @param {object} params: 
+ * @param {object} params:
  * @param {Boolean} reset: Whether to clear all existing parameters.
  * @param {Boolean} pushState: Whether to push the new URL onto the stack
  *        so that the back button can be used.
@@ -491,16 +494,6 @@ function setWindowURLQueryStringParameters(params, reset, pushState) {
         urlParams.set(index, value);
     });
 
-    saveWindowURL(urlParams, pushState);
-}
-
-/**
- * Delete a search param from the window
- * @param {String} param - param to delete 
- */
- function deleteWindowURLQueryStringParameter(param, pushState) {
-    let urlParams = (new URL(document.location)).searchParams;
-    urlParams.delete(param);
     saveWindowURL(urlParams, pushState);
 }
 
@@ -789,6 +782,10 @@ function str_to_bool(str) {
 $.get(API_NEW_BASE_URL + 'trails', null, function (reply) {
     // Key by id
     for (var i = 0; i < reply.data.length; i++) {
+        if (reply.data[i].status === 0) {
+            // Skip unpublished trails
+            continue;
+        }
         trail = reply.data[i];
         // Change string versions of "Yes" & "No" into booleans
         trail.bike = str_to_bool(trail.bike);
@@ -1163,7 +1160,8 @@ function loadMapAndStartingState() {
     }
 
     // Set the appropriate basemap radio button in Settings
-    var base = urlParams.get('base') || 'map';
+    var base = urlParams.get('base') || DEFAULT_LAYER;
+    var satelliteButton = $('input[name="basemap"][value="photo"]');
     var defaultMapButton = $('input[name="basemap"][value="map"]');
     var satelliteButton = $('input[name="basemap"][value="photo"]');
     var terrainButton = $('input[name="basemap"][value="terrain"]');
@@ -1832,6 +1830,12 @@ function updateWindowURLZoom() {
  * Update the window URL with baselayer param.
  */
 function updateWindowURLLayer() {
+    // Default is vector/map layer
+    var layer = DEFAULT_LAYER;
+    // Else, satellite ("photo")
+    if (getBasemap() == 'photo') {
+        layer = 'photo';
+    }
     invalidateWindowURL();
     setWindowURLQueryStringParameters({base: currentMapLayer}, false, false);
 }

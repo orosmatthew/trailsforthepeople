@@ -240,7 +240,8 @@ function loadMapAndStartingState() {
     }
 
     // Set the appropriate basemap radio button in Settings
-    var base = urlParams.get('base') || 'map';
+    var base = urlParams.get('base') || DEFAULT_LAYER;
+    var satelliteButton = $('input[name="basemap"][value="photo"]');
     var defaultMapButton = $('input[name="basemap"][value="map"]');
     var satelliteButton = $('input[name="basemap"][value="photo"]');
     var terrainButton = $('input[name="basemap"][value="terrain"]');
@@ -909,6 +910,12 @@ function updateWindowURLZoom() {
  * Update the window URL with baselayer param.
  */
 function updateWindowURLLayer() {
+    // Default is vector/map layer
+    var layer = DEFAULT_LAYER;
+    // Else, satellite ("photo")
+    if (getBasemap() == 'photo') {
+        layer = 'photo';
+    }
     invalidateWindowURL();
     setWindowURLQueryStringParameters({base: currentMapLayer}, false, false);
 }

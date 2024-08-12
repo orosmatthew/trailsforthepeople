@@ -1,5 +1,5 @@
  /**
- * embedded.js
+ * embedded-visit.js
  *
  * CM Parks Visit page: external embedded map.
  * Requires map-embedded-base (or map-embedded-base-nojq)
@@ -16,7 +16,7 @@ $(document).ready(function() {
      * Set up the map
      */
     var mapOptions = {
-        base: 'map',
+        base: DEFAULT_LAYER,
         scrollZoom: false,
         trackUserLocation: false
     };
